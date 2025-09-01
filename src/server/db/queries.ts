@@ -2,37 +2,39 @@ import { files_table as filesSchema, folders_table as foldersSchema } from "~/se
 import { db } from "~/server/db";
 import { eq } from "drizzle-orm";
 
-export async function getAllParentsForFolder(folderId: number) {
-  const parents = [];
-  let currentId: number | null = folderId;
-  while (currentId !== null) {
-    const folder = await db
-    .selectDistinct()
-    .from(foldersSchema)
-    .where(eq(foldersSchema.id, currentId));
+export const QUERIES = {
+  getAllParentsForFolder: async function(folderId: number) {
+    const parents = [];
+    let currentId: number | null = folderId;
+    while (currentId !== null) {
+      const folder = await db
+      .selectDistinct()
+      .from(foldersSchema)
+      .where(eq(foldersSchema.id, currentId));
 
-    if(!folder[0]) {
-      throw new Error("Folder not found");
+      if(!folder[0]) {
+        throw new Error("Folder not found");
+      }
+
+      parents.unshift(folder[0]);
+      currentId = folder[0]?.parent;
     }
+    return parents;
+  },
 
-    parents.unshift(folder[0]);
-    currentId = folder[0]?.parent;
+  getFiles: function(fileId: number) {
+    return db
+    .select()
+    .from(filesSchema)
+    .where(eq(filesSchema.parent, fileId));
+  },
+
+  getFolders: function(folderId: number) {
+    return db
+    .select()
+    .from(foldersSchema)
+    .where(eq(foldersSchema.parent, folderId));
   }
-  return parents;
-}
-
-export function getFiles(fileId: number) {
-  return db
-  .select()
-  .from(filesSchema)
-  .where(eq(filesSchema.parent, fileId));
-}
-
-export function getFolders(folderId: number) {
-  return db
-  .select()
-  .from(foldersSchema)
-  .where(eq(foldersSchema.parent, folderId));
 }
 
 
