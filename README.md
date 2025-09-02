@@ -12,7 +12,7 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 
 ## 31-8-225
 
-- [ ] Change folders to link components, remove all client state
-- [ ] Clean up the database and data fetching patterns
+- [ x ] Change folders to link components, remove all client state
+- [ x ] Clean up the database and data fetching patterns
 - [ ] Real homepage
 
