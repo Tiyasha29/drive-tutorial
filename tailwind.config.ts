@@ -8,8 +8,7 @@ export default withUt({
   content: ["./src/**/*.tsx"],
   theme: {
     extend: {
-      fontFamily: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      fontFamily: {       
         sans: ["var(--font-geist-sans)", ...fontFamily.fontFamily.sans],
       },
       borderRadius: {
