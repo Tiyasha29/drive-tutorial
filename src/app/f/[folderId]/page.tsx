@@ -12,7 +12,7 @@ export default async function GoogleDriveClone(props: {params: Promise<{ folderI
   const [folders, files, parents] = await Promise.all([QUERIES.getFolders(parsedForId), QUERIES.getFiles(parsedForId), QUERIES.getAllParentsForFolder(parsedForId)]);
 
   return (
-    <DriveContents files={files} folders={folders} parents={parents}/>
+    <DriveContents files={files} folders={folders} parents={parents} currentFolderId={parsedForId}/>
   )
 }
 

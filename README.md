@@ -12,8 +12,9 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 
 ## 3-9-225
 
-- [ ] Real homepage
-- [ ] Upload files to the right folder
+- [ x ] Add "ownership" for files and folders.
+- [ x ] Upload files to the right folder
 - [ ] Delete files button
 - [ ] Allow files that aren't images to be uploaded
+- [ ] Real homepage
 
