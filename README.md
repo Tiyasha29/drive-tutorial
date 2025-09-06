@@ -8,7 +8,8 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [ x ] Move folder open state to url
 - [ x ] Add auth
 - [ x ] Add file uploading
-- [ ] Add analytics
+- [ x ] Add analytics
+- [ x ] Make sure sort order is consistent
 - [ ] Add delete
 - [ ] Real homepage + onboarding
 
