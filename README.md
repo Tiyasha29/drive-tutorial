@@ -10,6 +10,6 @@ This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3
 - [ x ] Add file uploading
 - [ x ] Add analytics
 - [ x ] Make sure sort order is consistent
-- [ ] Add delete
+- [ x ] Add delete
 - [ ] Real homepage + onboarding
 
