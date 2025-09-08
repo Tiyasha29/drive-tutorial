@@ -47,7 +47,6 @@ export const ourFileRouter = {
       }
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 
       // (My personal comments for understanding)
       // Sends a url to the client-side, on which the file is uploaded. File is uploaded there.
