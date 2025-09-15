@@ -20,6 +20,13 @@ export const mockFolders: Folder[] = [
   { id: "2", name: "Images", type: "folder", parent: "root"},
   { id: "3", name: "Work", type: "folder", parent: "root"},
   { id: "8", name: "Presentations", type: "folder", parent: "3" },
+  { id: "8", name: "Vacation", type: "folder", parent: "3" },
+  { id: "8", name: "Videos", type: "folder", parent: "3" },
+  { id: "8", name: "Groceries", type: "folder", parent: "3" },
+  { id: "8", name: "Course Materials", type: "folder", parent: "3" },
+  { id: "8", name: "Lesson Plans", type: "folder", parent: "3" },
+  { id: "8", name: "Rsumes", type: "folder", parent: "3" },
+  { id: "8", name: "Family", type: "folder", parent: "3" },
 ]
 
 export const mockFiles: File[] = [

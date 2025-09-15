@@ -26,6 +26,7 @@ export default async function Sandbox() {
         const user = await auth();
 
         if(!user.userId) {
+          console.log("unauthorized");
           throw new Error("User not found");
         }
 

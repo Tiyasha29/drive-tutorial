@@ -29,11 +29,11 @@ export const QUERIES = {
     return folder[0];
   },
 
-  getFiles: function(fileId: number) {
+  getFiles: function(folderId: number) {
     return db
     .select()
     .from(filesSchema)
-    .where(eq(filesSchema.parent, fileId))
+    .where(eq(filesSchema.parent, folderId))
     .orderBy(filesSchema.id);
   },
 
@@ -51,6 +51,15 @@ export const QUERIES = {
     .where(and(eq(foldersSchema.ownerId, userId), isNull(foldersSchema.parent)));
 
     return folder[0];
+  },
+
+  getFoldersByOwnerId: async function(ownerId: string) {
+    const folders = await db
+    .select()
+    .from(foldersSchema)
+    .where(eq(foldersSchema.ownerId, ownerId));
+
+    return folders;
   }
 }
 
