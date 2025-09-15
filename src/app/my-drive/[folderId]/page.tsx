@@ -1,7 +1,6 @@
 import { QUERIES } from "~/server/db/queries"
 import { DataTable } from "~/components/data-table";
 import { columns } from "../columns";
-import { UploadButton } from "~/components/uploadthing";
 import DriveUploadButton from "~/components/drive-upload-button";
 
 // async function getData(): Promise<Folders[]> {
