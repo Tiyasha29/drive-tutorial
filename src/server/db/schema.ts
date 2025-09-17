@@ -1,4 +1,4 @@
-import { index, bigint, text, singlestoreTableCreator, int, timestamp } from "drizzle-orm/singlestore-core";
+import { index, bigint, text, singlestoreTableCreator, timestamp, float } from "drizzle-orm/singlestore-core";
 
 export const createTable = singlestoreTableCreator(
   (name) => `drive_tutorial_${name}`
@@ -8,7 +8,8 @@ export const files_table = createTable("files_table", {
   id: bigint("id", { mode: "number", unsigned: true }).primaryKey().autoincrement(),
   ownerId: text("owner_id").notNull(),
   name: text("name").notNull(),
-  size: int("size").notNull(),
+  size: float("size").notNull().default(0),
+  sizeUnit: text("size_unit", { enum: ['bytes', 'KB', 'MB', 'GB'] }).notNull().default('bytes'),
   url: text("url").notNull(),
   parent: bigint("parent", { mode: "number", unsigned: true }).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -26,7 +27,8 @@ export const folders_table = createTable("folders_table", {
   id: bigint("id", { mode: "number", unsigned: true }).primaryKey().autoincrement(),
   ownerId: text("owner_id").notNull(),
   name: text("name").notNull(),
-  size: int("size").notNull().default(0),
+  size: float("size").notNull().default(0),
+  sizeUnit: text("size_unit", { enum: ['bytes', 'KB', 'MB', 'GB'] }).notNull().default('bytes'),
   parent: bigint("parent", { mode: "number", unsigned: true }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
@@ -24,13 +25,15 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 export type Folders = {
   name: typeof folders_table.$inferSelect.name,
   lastUpdatedAt: typeof folders_table.$inferSelect.lastUpdatedAt,
-  size: typeof folders_table.$inferSelect.size
+  size: typeof folders_table.$inferSelect.size,
+  sizeUnit: typeof folders_table.$inferSelect.sizeUnit
 }
 
 export type Files = {
   name: typeof files_table.$inferSelect.name,
   lastUpdatedAt: typeof files_table.$inferSelect.lastUpdatedAt,
-  size: typeof files_table.$inferSelect.size;
+  size: typeof files_table.$inferSelect.size,
+  sizeUnit: typeof files_table.$inferSelect.sizeUnit
 }
 
 
@@ -86,6 +89,9 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
   {
     accessorKey: "size",
     header: "Size",
+    cell: ({ row }) => {
+      return <div>{`${row.getValue("size")} ${row.original.sizeUnit}`}</div>
+    }
   },
   {
     id: "actions",

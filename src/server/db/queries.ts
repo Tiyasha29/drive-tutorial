@@ -68,12 +68,16 @@ export const MUTATIONS = {
     file: {
       name: string;
       size: number;
+      sizeUnit: "bytes" | "KB"| "MB" | "GB";
       url: string;
       parent: number
     },
     userId: string
   }) {
-    return await db.insert(filesSchema).values({...input.file, ownerId: input.userId});
+    const fileCreated = db.insert(filesSchema).values({...input.file, ownerId: input.userId});
+    const updatedLastModifiedAt = db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, input.file.parent));
+
+    return Promise.all([fileCreated, updatedLastModifiedAt]);
   },
 
   onboardUser: async function(userId: string) {
@@ -102,7 +106,7 @@ export const MUTATIONS = {
     }]);
 
     return rootFolderId;
-  }
+  },
 }
 
 
