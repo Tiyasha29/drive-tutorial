@@ -20,7 +20,7 @@ export default function HomePage() {
           return redirect("/sign-in");
         }
 
-        return redirect("/drive");
+        return redirect("/my-drive");
       }}>
         <Button
           size="lg"

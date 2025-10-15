@@ -75,9 +75,13 @@ export const MUTATIONS = {
     userId: string
   }) {
     const fileCreated = db.insert(filesSchema).values({...input.file, ownerId: input.userId});
-    const updatedLastModifiedAt = db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, input.file.parent));
+    //const updatedLastModifiedAt = db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, input.file.parent));
 
-    return Promise.all([fileCreated, updatedLastModifiedAt]);
+    return Promise.all([fileCreated, MUTATIONS.updateLastModifiedAt(input.file.parent)]);
+  },
+
+  updateLastModifiedAt: async function (folderId: number){
+    return db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, folderId));
   },
 
   onboardUser: async function(userId: string) {

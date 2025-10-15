@@ -14,27 +14,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
-import type { files_table, folders_table } from "~/server/db/schema"
+import { folders_table, type files_table } from "~/server/db/schema"
+
 
 import dayjs from "dayjs";
 import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { MUTATIONS } from "~/server/db/queries"
+import { deleteFile, deleteFolder } from "~/server/actions"
+import { useRouter } from "next/navigation"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export type Folders = {
-  name: typeof folders_table.$inferSelect.name,
-  lastUpdatedAt: typeof folders_table.$inferSelect.lastUpdatedAt,
-  size: typeof folders_table.$inferSelect.size,
-  sizeUnit: typeof folders_table.$inferSelect.sizeUnit
-}
+// export type Folders = {
+//   name: typeof folders_table.$inferSelect.name,
+//   type: typeof folders_table.$inferSelect.type,
+//   lastUpdatedAt: typeof folders_table.$inferSelect.lastUpdatedAt,
+//   size: typeof folders_table.$inferSelect.size,
+//   sizeUnit: typeof folders_table.$inferSelect.sizeUnit,
+// }
 
-export type Files = {
-  name: typeof files_table.$inferSelect.name,
-  lastUpdatedAt: typeof files_table.$inferSelect.lastUpdatedAt,
-  size: typeof files_table.$inferSelect.size,
-  sizeUnit: typeof files_table.$inferSelect.sizeUnit
-}
+
+// export type Files = {
+//   name: typeof files_table.$inferSelect.name,
+//   type: typeof folders_table.$inferSelect.type,
+//   lastUpdatedAt: typeof files_table.$inferSelect.lastUpdatedAt,
+//   size: typeof files_table.$inferSelect.size,
+//   sizeUnit: typeof files_table.$inferSelect.sizeUnit,
+// }
+
+export type Folders = typeof folders_table.$inferSelect;
+export type Files = typeof files_table.$inferSelect;
 
 
 export const columns: ColumnDef<(Folders | Files)>[] = [
@@ -114,7 +124,13 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => {return}}
+              onClick={async() => {
+                if(typeof row.original === typeof folders_table.$inferSelect) {
+                  await deleteFolder(row.original.id);
+                } else {
+                  await deleteFile(row.original.id);
+                }
+              }}
             >
               Delete
             </DropdownMenuItem>

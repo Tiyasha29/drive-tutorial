@@ -2,7 +2,6 @@ import { columns, type Files, type Folders } from "./columns"
 import { DataTable } from "../../components/data-table"
 import { QUERIES } from "~/server/db/queries"
 import { auth } from "@clerk/nextjs/server"
-import { ModeToggle } from "~/components/mode-toggle";
 
 async function getData(): Promise<(Folders | Files)[]> {
   // Fetch data from your API here.
@@ -22,7 +21,6 @@ export default async function DemoPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <ModeToggle/>
       <DataTable columns={columns} data={data} />
     </div>
   )

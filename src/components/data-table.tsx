@@ -63,7 +63,7 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Search folders..."
+          placeholder="Search in Drive..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
@@ -97,15 +97,22 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                style={{cursor: 'default'}}
                 onClick={() => {
-                  router.push(`/my-drive/${(row.original as { id: number }).id}`);
-
+                  if((row.original as { type: string}).type === "folder") {
+                    router.push(`/my-drive/${(row.original as { id: number }).id}`);
+                  }
+        
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  (cell.column.id === "name") ?
+                  (<TableCell key={cell.id}>
+                    <a href={(row.original as { url: string }).url} target="_blank">{flexRender(cell.column.columnDef.cell, cell.getContext())}</a>
+                  </TableCell>) : 
+                  (<TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                  </TableCell>)
                 ))}
               </TableRow>
             ))
