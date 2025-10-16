@@ -25,7 +25,7 @@ export const mockFolders: Folder[] = [
   { id: "8", name: "Groceries", type: "folder", parent: "3" },
   { id: "8", name: "Course Materials", type: "folder", parent: "3" },
   { id: "8", name: "Lesson Plans", type: "folder", parent: "3" },
-  { id: "8", name: "Rsumes", type: "folder", parent: "3" },
+  { id: "8", name: "Resumes", type: "folder", parent: "3" },
   { id: "8", name: "Family", type: "folder", parent: "3" },
 ]
 

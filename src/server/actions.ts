@@ -72,5 +72,8 @@ export async function deleteFile(fileId: number) {
   await MUTATIONS.updateLastModifiedAt(file.parent);
 
 
+  await MUTATIONS.subtractFromFolderSize({sizeInBytes: file.sizeInBytes, folderId: file.parent});
+
+
   return {success: true};
   }

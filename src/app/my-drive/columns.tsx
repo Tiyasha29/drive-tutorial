@@ -22,6 +22,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { MUTATIONS } from "~/server/db/queries"
 import { deleteFile, deleteFolder } from "~/server/actions"
 import { useRouter } from "next/navigation"
+import { formatFileSize } from "../utility-functions/format-file-size"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -100,7 +101,13 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     accessorKey: "size",
     header: "Size",
     cell: ({ row }) => {
-      return <div>{`${row.getValue("size")} ${row.original.sizeUnit}`}</div>
+      if (row.original.type === "file"){
+        return <div>{`${row.getValue("size")} ${row.original.sizeUnit}`}</div>
+      } else {
+        const { fileSize, fileSizeUnit } = formatFileSize(row.original.size);
+        return <div>{`${fileSize} ${fileSizeUnit}`}</div>
+      }
+      
     }
   },
   {

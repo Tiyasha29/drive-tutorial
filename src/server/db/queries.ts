@@ -1,6 +1,7 @@
 import { files_table as filesSchema, folders_table as foldersSchema } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq, isNull, and } from "drizzle-orm";
+import { eq, isNull, and, sql } from "drizzle-orm";
+import { formatFileSize } from "~/app/utility-functions/format-file-size";
 
 export const QUERIES = {
   getAllParentsForFolder: async function(folderId: number) {
@@ -67,6 +68,7 @@ export const MUTATIONS = {
   createFile: async function(input: {
     file: {
       name: string;
+      sizeInBytes: number;
       size: number;
       sizeUnit: "bytes" | "KB"| "MB" | "GB";
       url: string;
@@ -82,6 +84,20 @@ export const MUTATIONS = {
 
   updateLastModifiedAt: async function (folderId: number){
     return db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, folderId));
+  },
+
+  addToFolderSize: async function (input: { sizeInBytes: number; folderId: number}) {
+    return db
+    .update(foldersSchema)
+    .set({ size: sql`${foldersSchema.size} + ${input.sizeInBytes}` })
+    .where(eq(foldersSchema.id, input.folderId))
+  },
+
+  subtractFromFolderSize: async function (input: { sizeInBytes: number; folderId: number}) {
+    return db
+    .update(foldersSchema)
+    .set({ size: sql`${foldersSchema.size} - ${input.sizeInBytes}` })
+    .where(eq(foldersSchema.id, input.folderId))
   },
 
   onboardUser: async function(userId: string) {

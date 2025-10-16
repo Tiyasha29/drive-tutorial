@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import z from "zod";
+import { formatFileSize } from "~/app/utility-functions/format-file-size";
 import { MUTATIONS, QUERIES } from "~/server/db/queries";
 
 const f = createUploadthing();
@@ -58,41 +59,13 @@ export const ourFileRouter = {
 
       console.log("file url", file.ufsUrl);
 
-       const fileSizeInBytes = file.size;
-       let fileSizeInKB = 0;
-       let fileSizeInMB = 0;
-       let fileSizeInGB = 0;
-       let fileSize = 0;
-       let fileSizeUnit: "bytes" | "KB" | "MB" | "GB" = "bytes";
-
-      // if(fileSizeInMB > 1 && fileSizeInMB < 1000) {
-      //   fileSize = parseFloat(fileSizeInMB.toFixed(2));
-      // } else if(fileSizeInMB > 1000) {
-      //   fileSize = parseFloat(fileSizeInGB.toFixed(2));
-      // } else {
-      //   fileSize = fileSizeInBytes;
-      // }
-
-      if(fileSizeInBytes >= 1073741824) { 
-        fileSizeInGB = parseFloat((fileSizeInBytes / 1073741824).toFixed(2))
-        fileSize = fileSizeInGB;
-        fileSizeUnit = "GB";
-      }
-      else if (fileSizeInBytes >= 1048576) {
-        fileSizeInMB = parseFloat((fileSizeInBytes / 1048576).toFixed(2))
-        fileSize = fileSizeInMB;
-        fileSizeUnit = "MB";
-      }
-      else if (fileSizeInBytes >= 1024){
-        fileSizeInKB = parseFloat((fileSizeInBytes / 1024).toFixed(2))
-        fileSize = fileSizeInKB;
-        fileSizeUnit = "KB";
-      }
-
+      const { fileSize, fileSizeUnit } = formatFileSize(file.size);
+       
       
     await MUTATIONS.createFile({
       file: {
         name: file.name,
+        sizeInBytes: file.size,
         size: fileSize,
         sizeUnit: fileSizeUnit,
         url: file.ufsUrl,
@@ -100,6 +73,8 @@ export const ourFileRouter = {
       },
       userId: metadata.userId
     });
+
+    await MUTATIONS.addToFolderSize( {sizeInBytes: file.size, folderId: metadata.parentId} );
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
 

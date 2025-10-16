@@ -9,6 +9,7 @@ export const files_table = createTable("files_table", {
   ownerId: text("owner_id").notNull(),
   name: text("name").notNull(),
   type: text("type").default("file"),
+  sizeInBytes: float("size_in_bytes").notNull().default(0),
   size: float("size").notNull().default(0),
   sizeUnit: text("size_unit", { enum: ['bytes', 'KB', 'MB', 'GB'] }).notNull().default('bytes'),
   url: text("url").notNull(),
