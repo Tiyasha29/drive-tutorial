@@ -106,10 +106,10 @@ export function DataTable<TData, TValue>({
                 }}
               >
                 {row.getVisibleCells().map((cell) => (
-                  (cell.column.id === "name") ?
-                  (<TableCell key={cell.id}>
-                    <a href={(row.original as { url: string }).url} target="_blank">{flexRender(cell.column.columnDef.cell, cell.getContext())}</a>
-                  </TableCell>) : 
+                   (cell.column.id === "name") ?
+                   (<TableCell key={cell.id}>
+                     <a href={(row.original as { url: string }).url} target="_blank">{flexRender(cell.column.columnDef.cell, cell.getContext())}</a>
+                   </TableCell>) : 
                   (<TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>)

@@ -15,18 +15,17 @@ export type Folder = {
 }
 
 export const mockFolders: Folder[] = [
-  { id: "root", name: "root", type: "folder", parent: null},
-  { id: "1", name: "Documents", type: "folder", parent: "root"},
-  { id: "2", name: "Images", type: "folder", parent: "root"},
-  { id: "3", name: "Work", type: "folder", parent: "root"},
-  { id: "8", name: "Presentations", type: "folder", parent: "3" },
-  { id: "8", name: "Vacation", type: "folder", parent: "3" },
-  { id: "8", name: "Videos", type: "folder", parent: "3" },
-  { id: "8", name: "Groceries", type: "folder", parent: "3" },
-  { id: "8", name: "Course Materials", type: "folder", parent: "3" },
-  { id: "8", name: "Lesson Plans", type: "folder", parent: "3" },
-  { id: "8", name: "Resumes", type: "folder", parent: "3" },
-  { id: "8", name: "Family", type: "folder", parent: "3" },
+  { id: "1", name: "Documents", type: "folder", parent: null},
+  { id: "2", name: "Images", type: "folder", parent: null},
+  { id: "3", name: "Work", type: "folder", parent: null},
+  { id: "4", name: "Presentations", type: "folder", parent: null },
+  { id: "5", name: "Vacation", type: "folder", parent: null },
+  { id: "6", name: "Videos", type: "folder", parent: null },
+  { id: "7", name: "Groceries", type: "folder", parent: null },
+  { id: "8", name: "Course Materials", type: "folder", parent: null },
+  { id: "9", name: "Lesson Plans", type: "folder", parent: null },
+  { id: "10", name: "Resumes", type: "folder", parent: null },
+  { id: "11", name: "Family", type: "folder", parent: null },
 ]
 
 export const mockFiles: File[] = [

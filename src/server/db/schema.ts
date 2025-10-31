@@ -29,6 +29,7 @@ export const folders_table = createTable("folders_table", {
   id: bigint("id", { mode: "number", unsigned: true }).primaryKey().autoincrement(),
   ownerId: text("owner_id").notNull(),
   name: text("name").notNull(),
+  description: text("description"),
   type: text("type").default("folder"),
   size: float("size").notNull().default(0),
   sizeUnit: text("size_unit", { enum: ['bytes', 'KB', 'MB', 'GB'] }).notNull().default('bytes'),

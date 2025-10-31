@@ -19,30 +19,14 @@ import { folders_table, type files_table } from "~/server/db/schema"
 
 import dayjs from "dayjs";
 import localizedFormat from 'dayjs/plugin/localizedFormat'
-import { MUTATIONS } from "~/server/db/queries"
 import { deleteFile, deleteFolder } from "~/server/actions"
-import { useRouter } from "next/navigation"
 import { formatFileSize } from "../utility-functions/format-file-size"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
+import { useRouter } from "next/navigation"
+import DataTableActions from "~/components/data-table-actions"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-
-// export type Folders = {
-//   name: typeof folders_table.$inferSelect.name,
-//   type: typeof folders_table.$inferSelect.type,
-//   lastUpdatedAt: typeof folders_table.$inferSelect.lastUpdatedAt,
-//   size: typeof folders_table.$inferSelect.size,
-//   sizeUnit: typeof folders_table.$inferSelect.sizeUnit,
-// }
-
-
-// export type Files = {
-//   name: typeof files_table.$inferSelect.name,
-//   type: typeof folders_table.$inferSelect.type,
-//   lastUpdatedAt: typeof files_table.$inferSelect.lastUpdatedAt,
-//   size: typeof files_table.$inferSelect.size,
-//   sizeUnit: typeof files_table.$inferSelect.sizeUnit,
-// }
 
 export type Folders = typeof folders_table.$inferSelect;
 export type Files = typeof files_table.$inferSelect;
@@ -83,7 +67,7 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
-    },
+    }
   },
   {
     accessorKey: "lastUpdatedAt",
@@ -115,34 +99,54 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     cell: ({ row }) => {
  
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => {return}}
-            >
-              Rename
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={async() => {
-                if(typeof row.original === typeof folders_table.$inferSelect) {
-                  await deleteFolder(row.original.id);
-                } else {
-                  await deleteFile(row.original.id);
-                }
-              }}
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        // <Dialog>
+        //   <DropdownMenu>
+        //     <DropdownMenuTrigger asChild>
+        //       <Button variant="ghost" className="h-8 w-8 p-0">
+        //         <span className="sr-only">Open menu</span>
+        //         <MoreHorizontal className="h-4 w-4" />
+        //       </Button>
+        //     </DropdownMenuTrigger>
+        //     <DropdownMenuContent align="end">
+        //       <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        //       <DropdownMenuItem
+        //         onClick={() => {return}}
+        //       >
+        //         Rename
+        //       </DropdownMenuItem>
+        //       <DropdownMenuSeparator />
+        //       <DialogTrigger asChild>
+        //       <DropdownMenuItem>
+        //         Delete
+        //       </DropdownMenuItem>
+        //       </DialogTrigger>
+        //     </DropdownMenuContent>
+        //   </DropdownMenu>
+        //   <DialogContent>
+        //     <form onSubmit={async() => {
+        //       if(typeof row.original === typeof folders_table.$inferSelect) {
+        //         await deleteFolder(row.original.id);
+        //       } else {
+        //         await deleteFile(row.original.id);
+        //       }
+        //     }}>
+        //       <DialogHeader>
+        //         <DialogTitle>Are you absolutely sure?</DialogTitle>
+        //         <DialogDescription>
+        //           This action cannot be undone. Are you sure you want to permanently
+        //           delete this file from our servers?
+        //         </DialogDescription>
+        //       </DialogHeader>
+        //       <DialogFooter>
+        //         <DialogClose asChild>
+        //           <Button type="submit">Confirm</Button>
+        //         </DialogClose>
+        //       </DialogFooter>
+        //     </form>
+        //   </DialogContent>
+        // </Dialog>
+
+        <DataTableActions row={row}/>
       )
     },
   },

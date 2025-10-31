@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "~/components/theme-provider";
+import ReactQueryProvider from "./providers/react-query-provider";
 
 export const metadata: Metadata = {
   title: "Drive Tutorial",
@@ -23,6 +24,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
         <body>
+          <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -31,6 +33,7 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
+          </ReactQueryProvider>
         </body>
       </html>
     </ClerkProvider>
