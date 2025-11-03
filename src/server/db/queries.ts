@@ -25,6 +25,14 @@ export const QUERIES = {
     return parents;
   },
 
+  getFileById: async function (fileId: number) {
+    const file = await db
+      .select()
+      .from(filesSchema)
+      .where(eq(filesSchema.id, fileId));
+    return file[0];
+  },
+
   getFolderById: async function (folderId: number) {
     const folder = await db
       .select()
@@ -140,6 +148,16 @@ export const MUTATIONS = {
       .update(foldersSchema)
       .set({ size: sql`${foldersSchema.size} - ${input.sizeInBytes}` })
       .where(eq(foldersSchema.id, input.folderId));
+  },
+
+  renameFileById: async function (input: {
+    fileId: number;
+    fileNameToBeRenamed: string;
+  }) {
+    return db
+      .update(filesSchema)
+      .set({ name: input.fileNameToBeRenamed })
+      .where(eq(filesSchema.id, input.fileId));
   },
 
   onboardUser: async function (userId: string) {
