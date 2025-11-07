@@ -8,7 +8,6 @@ import { UTApi } from "uploadthing/server";
 import { cookies } from "next/headers";
 import { MUTATIONS, QUERIES } from "./db/queries";
 import { revalidatePath } from "next/cache";
-import z from "zod";
 
 // export async function deleteFile(fileId: number) {
 //   const session = await auth();
@@ -44,6 +43,7 @@ import z from "zod";
 // }
 
 export async function deleteFolder(folderId: number) {
+  console.log("hello");
   const session = await auth();
   const utApi = new UTApi();
 
@@ -51,8 +51,9 @@ export async function deleteFolder(folderId: number) {
     return { error: "Unauthorized" };
   }
 
-  await db
-    .delete(folders_table)
+  const [folder] = await db
+    .select()
+    .from(folders_table)
     .where(
       and(
         eq(folders_table.id, folderId),
@@ -60,14 +61,14 @@ export async function deleteFolder(folderId: number) {
       ),
     );
 
-  await db
-    .delete(files_table)
-    .where(
-      and(
-        eq(files_table.parent, folderId),
-        eq(files_table.ownerId, session.userId),
-      ),
-    );
+  if (!folder) {
+    return { error: "Folder Not Found" };
+  }
+
+  await db.delete(files_table).where(eq(files_table.parent, folderId));
+  await db.delete(folders_table).where(eq(folders_table.id, folderId));
+
+  return { success: true };
 }
 
 export async function deleteFile(fileId: number) {
@@ -155,6 +156,30 @@ export async function renameFile(formData: FormData) {
       .concat(".")
       .concat(file.name.split(".").pop() ?? ""),
   });
+
+  return { success: true };
+}
+
+export async function renameFolder(formData: FormData) {
+  const { userId } = await auth();
+  if (!userId) {
+    return { error: "Unauthorized" };
+  }
+
+  const folderNameToBeRenamed = JSON.stringify(formData.get("foldername"));
+
+  const folder = await QUERIES.getFolderById(Number(formData.get("folderId")));
+
+  if (!folder) {
+    return { error: "Folder not found" };
+  }
+
+  await MUTATIONS.renameFolderById({
+    folderId: Number(formData.get("folderId")),
+    folderNameToBeRenamed: JSON.parse(folderNameToBeRenamed) as string,
+  });
+
+  await MUTATIONS.updateLastModifiedAt(Number(formData.get("folderId")));
 
   return { success: true };
 }

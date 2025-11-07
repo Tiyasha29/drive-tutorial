@@ -6,24 +6,15 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react"
  
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
+
 import { folders_table, type files_table } from "~/server/db/schema"
 
 
 import dayjs from "dayjs";
 import localizedFormat from 'dayjs/plugin/localizedFormat'
-import { deleteFile, deleteFolder } from "~/server/actions"
 import { formatFileSize } from "../utility-functions/format-file-size"
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
-import { useRouter } from "next/navigation"
-import DataTableActions from "~/components/data-table-actions"
+import DataTableActionsFile from "~/components/data-table-actions-file"
+import DataTableActionsFolder from "~/components/data-table-actions-folder"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -99,54 +90,9 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     cell: ({ row }) => {
  
       return (
-        // <Dialog>
-        //   <DropdownMenu>
-        //     <DropdownMenuTrigger asChild>
-        //       <Button variant="ghost" className="h-8 w-8 p-0">
-        //         <span className="sr-only">Open menu</span>
-        //         <MoreHorizontal className="h-4 w-4" />
-        //       </Button>
-        //     </DropdownMenuTrigger>
-        //     <DropdownMenuContent align="end">
-        //       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        //       <DropdownMenuItem
-        //         onClick={() => {return}}
-        //       >
-        //         Rename
-        //       </DropdownMenuItem>
-        //       <DropdownMenuSeparator />
-        //       <DialogTrigger asChild>
-        //       <DropdownMenuItem>
-        //         Delete
-        //       </DropdownMenuItem>
-        //       </DialogTrigger>
-        //     </DropdownMenuContent>
-        //   </DropdownMenu>
-        //   <DialogContent>
-        //     <form onSubmit={async() => {
-        //       if(typeof row.original === typeof folders_table.$inferSelect) {
-        //         await deleteFolder(row.original.id);
-        //       } else {
-        //         await deleteFile(row.original.id);
-        //       }
-        //     }}>
-        //       <DialogHeader>
-        //         <DialogTitle>Are you absolutely sure?</DialogTitle>
-        //         <DialogDescription>
-        //           This action cannot be undone. Are you sure you want to permanently
-        //           delete this file from our servers?
-        //         </DialogDescription>
-        //       </DialogHeader>
-        //       <DialogFooter>
-        //         <DialogClose asChild>
-        //           <Button type="submit">Confirm</Button>
-        //         </DialogClose>
-        //       </DialogFooter>
-        //     </form>
-        //   </DialogContent>
-        // </Dialog>
-
-        <DataTableActions row={row}/>
+        (row.original.type === "file") ?
+        <DataTableActionsFile row={row}/> :
+        <DataTableActionsFolder row={row}/>
       )
     },
   },

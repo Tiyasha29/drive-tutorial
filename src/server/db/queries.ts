@@ -160,6 +160,16 @@ export const MUTATIONS = {
       .where(eq(filesSchema.id, input.fileId));
   },
 
+  renameFolderById: async function (input: {
+    folderId: number;
+    folderNameToBeRenamed: string;
+  }) {
+    return db
+      .update(foldersSchema)
+      .set({ name: input.folderNameToBeRenamed })
+      .where(eq(foldersSchema.id, input.folderId));
+  },
+
   onboardUser: async function (userId: string) {
     const rootFolder = await db
       .insert(foldersSchema)

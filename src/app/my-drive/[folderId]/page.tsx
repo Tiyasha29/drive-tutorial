@@ -1,5 +1,5 @@
 import { QUERIES } from "~/server/db/queries"
-import { DataTable } from "~/components/data-table";
+import { DataTableFile } from "~/components/data-table-file";
 import { columns } from "../columns";
 import DriveUploadButton from "~/components/drive-upload-button";
 
@@ -24,7 +24,7 @@ export default async function DemoPage(props: { params: Promise<{ folderId: stri
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data}/>
+      <DataTableFile columns={columns} data={data}/>
       <div className="absolute top-8 right-4 text-white px-4 py-2 ">
         <DriveUploadButton folderId={folderId}/>
       </div>

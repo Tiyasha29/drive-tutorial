@@ -1,5 +1,4 @@
 import { columns, type Files, type Folders } from "./columns"
-import { DataTable } from "../../components/data-table"
 import { MUTATIONS, QUERIES } from "~/server/db/queries"
 import { auth } from "@clerk/nextjs/server"
 import { Button } from "~/components/ui/button";
@@ -8,6 +7,7 @@ import { Label } from "~/components/ui/label";
 import { Input } from "~/components/ui/input";
 import { folders_table } from "~/server/db/schema";
 import { createFolderAction } from "~/server/actions";
+import { DataTableFolder } from "~/components/data-table-folder";
 
 
 type FolderNameType = typeof folders_table.$inferSelect.name;
@@ -32,8 +32,7 @@ export default async function DemoPage() {
 
   return (
       <div className="container mx-auto py-10">
-        <Dialog>
-          
+        <Dialog>         
             <DialogTrigger asChild>
               <Button className="absolute top-8 right-4 h-15 w-18">
                 <svg
@@ -81,7 +80,7 @@ export default async function DemoPage() {
               </form>  
             </DialogContent>
         </Dialog>
-        <DataTable columns={columns} data={data} />
+        <DataTableFolder columns={columns} data={data} />
       </div>
       
   )

@@ -20,18 +20,16 @@ import { useRouter } from "next/navigation"
 import { MoreHorizontal, MoreHorizontalIcon } from "lucide-react"
 import type { Row } from "@tanstack/react-table"
 import { useMutation } from "@tanstack/react-query"
-import { Label } from "./ui/label"
 import { Input } from "./ui/input"
 import { useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "./ui/field"
-import { Textarea } from "./ui/textarea"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog"
 
 
 export type Folders = typeof folders_table.$inferSelect;
 export type Files = typeof files_table.$inferSelect;
 
-export default function DataTableActions(props: { row: Row<Folders | Files> }) {
+export default function DataTableActionsFile(props: { row: Row<Folders | Files> }) {
   const { row } = props;
   const router = useRouter();
 
@@ -117,18 +115,13 @@ export default function DataTableActions(props: { row: Row<Folders | Files> }) {
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete your
-                account and remove your data from our servers.
+                file and remove your data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={async() => {
-                if(typeof row.original === typeof folders_table.$inferSelect) {
-                    server_deleteFolder(row.original.id);
-                  } else {
-                    server_deleteFile(row.original.id);
-                  }
-
+                server_deleteFile(row.original.id);
               }}>Continue</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
