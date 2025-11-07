@@ -33,20 +33,12 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
   const { row } = props;
   const router = useRouter();
 
-  const [showNewDialog, setShowRenameDialog] = useState(false)
-  const [showShareDialog, setShowDeleteDialog] = useState(false)
+  const [showRenameDialog, setShowRenameDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { mutate: server_deleteFile } = useMutation({
     mutationFn: deleteFile,
     
-    onSuccess: () => {
-      router.refresh();
-    }
-  })
-
-  const { mutate: server_deleteFolder } = useMutation({
-    mutationFn: deleteFolder,
-
     onSuccess: () => {
       router.refresh();
     }
@@ -81,7 +73,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Dialog open={showNewDialog} onOpenChange={setShowRenameDialog}>
+      <Dialog open={showRenameDialog} onOpenChange={setShowRenameDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <form action={server_renameFile}>
             <DialogHeader>
@@ -109,7 +101,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
           </form>
         </DialogContent>
       </Dialog>
-        <AlertDialog open={showShareDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -121,7 +113,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={async() => {
-                server_deleteFile(row.original.id);
+                server_deleteFile([row.original.id]);
               }}>Continue</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

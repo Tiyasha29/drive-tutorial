@@ -60,7 +60,7 @@ export function DataTableFile<TData, TValue>({
   })
 
   return (
-    <div>
+    <div className="mx-auto max-w-6xl px-4">
       <div className="flex items-center py-4">
         <Input
           placeholder="Search in Drive..."

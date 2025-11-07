@@ -15,6 +15,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { formatFileSize } from "../utility-functions/format-file-size"
 import DataTableActionsFile from "~/components/data-table-actions-file"
 import DataTableActionsFolder from "~/components/data-table-actions-folder"
+import DataTableActionsSelectedRows from "~/components/data-table-actions-selected-rows"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -68,7 +69,6 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
       dayjs.extend(localizedFormat);
       const formattedDate = dayjs(new Date(row.getValue("lastUpdatedAt"))).format('lll');
   
-
       return <div>{formattedDate}</div>;
     }
   },
@@ -87,6 +87,11 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
   },
   {
     id: "actions",
+    header: ({ table }) => {
+      return (
+        <DataTableActionsSelectedRows selectedRows={table.getSelectedRowModel().rows}/>
+      )
+    },
     cell: ({ row }) => {
  
       return (
