@@ -24,7 +24,7 @@ export function FileRow(props: {
         <div className="col-span-3 text-gray-400">{file.size}</div>
         <div className="col-span-1 text-gray-400">
           <Button variant="ghost" aria-label="Delete file" onClick={async() => {
-            await deleteFile(file.id);
+            await deleteFile([file.id]);
           }}>
             <Trash2Icon size={20}/>
           </Button>
