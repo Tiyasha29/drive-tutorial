@@ -68,11 +68,11 @@ export async function deleteFile(fileIds: number[]) {
   await db.delete(files_table).where(inArray(files_table.id, fileIds));
 
   files.forEach(async (file) => {
-    await MUTATIONS.updateLastModifiedAt(file.parent);
+    await MUTATIONS.updateLastModifiedAtFolder(file.parent);
   });
 
   files.forEach(async (file) => {
-    await MUTATIONS.updateLastModifiedAt(file.parent);
+    await MUTATIONS.updateLastModifiedAtFolder(file.parent);
 
     await MUTATIONS.subtractFromFolderSize({
       sizeInBytes: file.sizeInBytes,
@@ -91,15 +91,19 @@ export async function createFolderAction(formData: FormData) {
 
   const folderName = JSON.stringify(formData.get("name"));
   const folderDescription = JSON.stringify(formData.get("description"));
-  await MUTATIONS.createFolder({
+  const folderParentFolderId = JSON.parse(
+    JSON.stringify(formData.get("parent")),
+  );
+  const pathName = JSON.stringify(formData.get("pathname"));
+  MUTATIONS.createFolder({
     folder: {
       name: JSON.parse(folderName) as string,
       description: JSON.parse(folderDescription) as string,
-      parent: null,
+      parent: folderParentFolderId,
     },
     userId,
   });
-  revalidatePath("/my-drive");
+  revalidatePath(`${pathName}`);
 }
 
 export async function renameFile(formData: FormData) {
@@ -132,6 +136,23 @@ export async function renameFile(formData: FormData) {
       .concat(file.name.split(".").pop() ?? ""),
   });
 
+  await MUTATIONS.updateLastModifiedAtFile(Number(formData.get("fileId")));
+
+  let currentParentFolder = await QUERIES.getFolderById(file.parent);
+
+  while (currentParentFolder) {
+    await MUTATIONS.updateLastModifiedAtFolder(currentParentFolder.id);
+
+    // If this folder has no parent, stop climbing
+    if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
+      break;
+    }
+
+    currentParentFolder = await QUERIES.getFolderById(
+      currentParentFolder.parent,
+    );
+  }
+
   return { success: true };
 }
 
@@ -154,7 +175,24 @@ export async function renameFolder(formData: FormData) {
     folderNameToBeRenamed: JSON.parse(folderNameToBeRenamed) as string,
   });
 
-  await MUTATIONS.updateLastModifiedAt(Number(formData.get("folderId")));
+  await MUTATIONS.updateLastModifiedAtFolder(Number(formData.get("folderId")));
+
+  if (folder.parent === null) return; //can be deleted later, temporary
+
+  let currentParentFolder = await QUERIES.getFolderById(folder.parent);
+
+  while (currentParentFolder) {
+    await MUTATIONS.updateLastModifiedAtFolder(currentParentFolder.id);
+
+    // If this folder has no parent, stop climbing
+    if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
+      break;
+    }
+
+    currentParentFolder = await QUERIES.getFolderById(
+      currentParentFolder.parent,
+    );
+  }
 
   return { success: true };
 }

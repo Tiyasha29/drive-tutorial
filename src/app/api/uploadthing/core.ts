@@ -20,12 +20,11 @@ export const ourFileRouter = {
       maxFileCount: 9999,
     },
   })
-
-  .input(
-    z.object({
-      folderId: z.number()
-    })
-  )
+    .input(
+      z.object({
+        folderId: z.number(),
+      }),
+    )
     // Set permissions and file types for this FileRoute
     .middleware(async ({ input }) => {
       // This code runs on your server before upload
@@ -37,12 +36,12 @@ export const ourFileRouter = {
 
       const folder = await QUERIES.getFolderById(input.folderId);
 
-      if(!folder) {
+      if (!folder) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error
         if (!user.userId) throw new UploadThingError("Folder not found");
       }
 
-      if(folder?.ownerId !== user.userId) {
+      if (folder?.ownerId !== user.userId) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error
         if (!user.userId) throw new UploadThingError("Unauthorized");
       }
@@ -60,21 +59,41 @@ export const ourFileRouter = {
       console.log("file url", file.ufsUrl);
 
       const { fileSize, fileSizeUnit } = formatFileSize(file.size);
-       
-      
-    await MUTATIONS.createFile({
-      file: {
-        name: file.name,
-        sizeInBytes: file.size,
-        size: fileSize,
-        sizeUnit: fileSizeUnit,
-        url: file.ufsUrl,
-        parent: metadata.parentId
-      },
-      userId: metadata.userId
-    });
 
-    await MUTATIONS.addToFolderSize( {sizeInBytes: file.size, folderId: metadata.parentId} );
+      await MUTATIONS.createFile({
+        file: {
+          name: file.name,
+          sizeInBytes: file.size,
+          size: fileSize,
+          sizeUnit: fileSizeUnit,
+          url: file.ufsUrl,
+          parent: metadata.parentId,
+        },
+        userId: metadata.userId,
+      });
+
+      // await MUTATIONS.addToFolderSize({
+      //   sizeInBytes: file.size,
+      //   folderId: metadata.parentId,
+      // });
+
+      let currentParentFolder = await QUERIES.getFolderById(metadata.parentId);
+
+      while (currentParentFolder) {
+        await MUTATIONS.addToFolderSize({
+          sizeInBytes: file.size,
+          folderId: currentParentFolder.id,
+        });
+
+        // If this folder has no parent, stop climbing
+        if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
+          break;
+        }
+
+        currentParentFolder = await QUERIES.getFolderById(
+          currentParentFolder.parent,
+        );
+      }
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
 

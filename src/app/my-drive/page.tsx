@@ -8,6 +8,8 @@ import { Input } from "~/components/ui/input";
 import { folders_table } from "~/server/db/schema";
 import { createFolderAction } from "~/server/actions";
 import { DataTableFolder } from "~/components/data-table-folder";
+import UploadDropDownFolder from "~/components/upload-dropdown-folder";
+import { DataTable } from "~/components/data-table";
 
 
 type FolderNameType = typeof folders_table.$inferSelect.name;
@@ -22,7 +24,7 @@ async function getData(): Promise<(Folders | Files)[]> {
   if(!userId) {
     throw new Error("Unauthorized");
   }
-  const fetchedFolders = QUERIES.getFoldersByOwnerId(userId);
+  const fetchedFolders = QUERIES.getFolders(0);
 
   return fetchedFolders;
 }
@@ -32,7 +34,7 @@ export default async function DemoPage() {
 
   return (
       <div className="container mx-auto py-10">
-        <Dialog>         
+        {/* <Dialog>         
             <DialogTrigger asChild>
               <Button className="absolute top-8 right-4 h-15 w-18">
                 <svg
@@ -79,8 +81,11 @@ export default async function DemoPage() {
                 </DialogFooter>
               </form>  
             </DialogContent>
-        </Dialog>
-        <DataTableFolder columns={columns} data={data} />
+        </Dialog> */}
+        <div className="absolute top-8 right-4 h-15 w-18">
+          <UploadDropDownFolder/>
+        </div>
+        <DataTable columns={columns} data={data} />
       </div>
       
   )

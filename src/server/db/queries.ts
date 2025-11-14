@@ -91,43 +91,78 @@ export const MUTATIONS = {
     };
     userId: string;
   }) {
-    const fileCreated = db
+    await db
       .insert(filesSchema)
       .values({ ...input.file, ownerId: input.userId });
-    //const updatedLastModifiedAt = db.update(foldersSchema).set({ lastUpdatedAt: new Date()}).where(eq(foldersSchema.id, input.file.parent));
+    let currentParentFolder = await QUERIES.getFolderById(input.file.parent);
 
-    return Promise.all([
-      fileCreated,
-      MUTATIONS.updateLastModifiedAt(input.file.parent),
-    ]);
+    while (currentParentFolder) {
+      await MUTATIONS.updateLastModifiedAtFolder(currentParentFolder.id);
+
+      // If this folder has no parent, stop climbing
+      if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
+        break;
+      }
+
+      currentParentFolder = await QUERIES.getFolderById(
+        currentParentFolder.parent,
+      );
+    }
+
+    // return Promise.all([
+    //   fileCreated,
+    //   MUTATIONS.updateLastModifiedAt(input.file.parent),
+    // ]);
   },
   createFolder: async function (input: {
     folder: {
       name: string;
       description: string;
-      parent: number | null;
+      parent: number;
     };
     userId: string;
   }) {
-    const folderCreated = db
+    await db
       .insert(foldersSchema)
       .values({ ...input.folder, ownerId: input.userId });
 
-    if (input.folder.parent !== null) {
-      return Promise.all([
-        folderCreated,
-        MUTATIONS.updateLastModifiedAt(input.folder.parent),
-      ]);
-    } else {
-      return folderCreated;
+    if (input.folder.parent !== 0) {
+      // return Promise.all([
+      //   folderCreated,
+      //   MUTATIONS.updateLastModifiedAt(input.folder.parent),
+      // ]);
+
+      let currentParentFolder = await QUERIES.getFolderById(
+        input.folder.parent,
+      );
+
+      while (currentParentFolder) {
+        await MUTATIONS.updateLastModifiedAtFolder(currentParentFolder.id);
+
+        // If this folder has no parent, stop climbing
+        if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
+          break;
+        }
+
+        currentParentFolder = await QUERIES.getFolderById(
+          currentParentFolder.parent,
+        );
+      }
     }
   },
 
-  updateLastModifiedAt: async function (folderId: number) {
+  updateLastModifiedAtFolder: async function (folderId: number) {
     return db
       .update(foldersSchema)
       .set({ lastUpdatedAt: new Date() })
       .where(eq(foldersSchema.id, folderId));
+  },
+
+  updateLastModifiedAtFile: async function (fileId: number) {
+    return db
+      .update(filesSchema)
+      .set({ lastUpdatedAt: new Date() })
+      .where(eq(filesSchema.id, fileId));
   },
 
   addToFolderSize: async function (input: {
