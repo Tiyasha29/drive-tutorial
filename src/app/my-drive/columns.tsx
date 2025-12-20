@@ -17,6 +17,8 @@ import DataTableActionsFile from "~/components/data-table-actions-file"
 import DataTableActionsFolder from "~/components/data-table-actions-folder"
 import DataTableActionsSelectedRows from "~/components/data-table-actions-selected-rows"
 
+import { Folder as FolderIcon, File as FileIcon } from 'lucide-react';
+
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
@@ -46,6 +48,12 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    id: "icon",
+    cell: ({ row }) => {
+      return (row.original.type === "folder") ? <FolderIcon/> : <FileIcon/>
+    }
   },
   {
     accessorKey: "name",

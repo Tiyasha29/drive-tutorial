@@ -72,11 +72,6 @@ export const ourFileRouter = {
         userId: metadata.userId,
       });
 
-      // await MUTATIONS.addToFolderSize({
-      //   sizeInBytes: file.size,
-      //   folderId: metadata.parentId,
-      // });
-
       let currentParentFolder = await QUERIES.getFolderById(metadata.parentId);
 
       while (currentParentFolder) {

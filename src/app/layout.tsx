@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "~/components/theme-provider";
 import ReactQueryProvider from "./providers/react-query-provider";
+import { checkUserOnSignIn } from "./utility-functions/check-user-on-sign-in";
 
 export const metadata: Metadata = {
   title: "Drive Tutorial",
@@ -17,9 +18,10 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await checkUserOnSignIn();
   return (
     <ClerkProvider>
       <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>

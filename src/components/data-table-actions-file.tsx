@@ -86,7 +86,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
             <FieldGroup className="pb-3">
               <Field>
                 <FieldLabel htmlFor="filename">File Name</FieldLabel>
-                <Input id="filename" name="filename" placeholder="New File Name..." />
+                <Input id="filename" name="filename" defaultValue={row.original.name.split(".")[0]} />
                 <input type="hidden" name="fileId" value={row.original.id} />
               </Field>
             </FieldGroup>

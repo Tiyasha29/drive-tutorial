@@ -86,7 +86,7 @@ export default function DataTableActionsFolder(props: { row: Row<Folders | Files
             <FieldGroup className="pb-3">
               <Field>
                 <FieldLabel htmlFor="foldername">Folder Name</FieldLabel>
-                <Input id="foldername" name="foldername" placeholder="New Folder Name..." />
+                <Input id="foldername" name="foldername" defaultValue={row.original.name} />
                 <input type="hidden" name="folderId" value={row.original.id} />
               </Field>
             </FieldGroup>

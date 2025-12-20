@@ -1,92 +1,55 @@
 import { columns, type Files, type Folders } from "./columns"
 import { MUTATIONS, QUERIES } from "~/server/db/queries"
 import { auth } from "@clerk/nextjs/server"
-import { Button } from "~/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
-import { Label } from "~/components/ui/label";
-import { Input } from "~/components/ui/input";
-import { folders_table } from "~/server/db/schema";
-import { createFolderAction } from "~/server/actions";
-import { DataTableFolder } from "~/components/data-table-folder";
-import UploadDropDownFolder from "~/components/upload-dropdown-folder";
+import { folders_table, users_table } from "~/server/db/schema";
 import { DataTable } from "~/components/data-table";
+import UploadDropDownFileAndFolder from "~/components/upload-dropdown-file-and-folder";
+import { UserButton } from "@clerk/nextjs";
+import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
+import { AppSidebar } from "~/components/app-sidebar";
+import { SiteHeader } from "~/components/site-header";
+import { db } from "~/server/db";
+import { eq } from "drizzle-orm";
 
 
 type FolderNameType = typeof folders_table.$inferSelect.name;
 type FolderDescriptionType = typeof folders_table.$inferSelect.description;
 
- 
-async function getData(): Promise<(Folders | Files)[]> {
-  // Fetch data from your API here.
 
+export default async function DemoPage() {
+  
   const session = await auth();
   const { userId } = session;
   if(!userId) {
     throw new Error("Unauthorized");
   }
-  const fetchedFolders = QUERIES.getFolders(0);
+  const fetchedFolders = await QUERIES.getFolders(0);
+  const fetchedFiles = await QUERIES.getFiles(0);
+  
+  const data = [...fetchedFolders, ...fetchedFiles];
 
-  return fetchedFolders;
-}
-
-export default async function DemoPage() {
-  const data = await getData()
+  const sizeInBytesUsedByUser = (await db.select().from(users_table).where(eq(users_table.userId, userId)))[0]?.sizeInBytesUsed ?? 0;
 
   return (
-      <div className="container mx-auto py-10">
-        {/* <Dialog>         
-            <DialogTrigger asChild>
-              <Button className="absolute top-8 right-4 h-15 w-18">
-                <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24" //coordinates from (0,0) to (24, 24)
-                        stroke="currentColor"
-                        width="2em" //2 times the font size
-                        height="2em" 
-                        className="text-primary-foreground"
-                      >
-                        <path d="M9 4.5v15m7.5-7.5h-15" />
-                </svg>
-                <div className="text-primary-foreground">
-                  New
-                </div>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">   
-              <form action={createFolderAction}>         
-                <DialogHeader>
-                  <DialogTitle>New folder</DialogTitle>
-                  <DialogDescription>
-                    Create a new folder here. Click create when you&apos;re
-                    done.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  <div className="grid gap-3">
-                    <Label htmlFor="name-1">Name</Label>
-                    <Input id="name-1" name="name" defaultValue="New Folder" minLength={1} required/>
-                  </div>
-                  <div className="grid gap-3">
-                    <Label htmlFor="description-1">Description</Label>
-                    <Input id="description-1" name="description" defaultValue="" />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                  <DialogClose asChild>
-                    <Button type="submit">Create</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </form>  
-            </DialogContent>
-        </Dialog> */}
-        <div className="absolute top-8 right-4 h-15 w-18">
-          <UploadDropDownFolder/>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <DataTable columns={columns} data={data} />
+            </div>
+          </div>
         </div>
-        <DataTable columns={columns} data={data} />
-      </div>
-      
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

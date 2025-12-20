@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "./ui/button"
 import {
   Dialog,
@@ -28,12 +28,12 @@ import { createFolderAction } from "~/server/actions";
 import DriveUploadButton from "./drive-upload-button";
 import { usePathname } from "next/navigation";
 
+
 export default function UploadDropDownFileAndFolder(props: {folderId: number}) {
   const [showCreateNewFolderDialog, setShowCreateNewFolderDialog] = useState(false)
-  const [showShareDialog, setShowShareDialog] = useState(false)
 
   const pathname = usePathname();
-
+  
   return (
     <>
       <DropdownMenu modal={false}>
@@ -41,13 +41,10 @@ export default function UploadDropDownFileAndFolder(props: {folderId: number}) {
           <Button><Plus/> New</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40" align="end">
-          <DropdownMenuLabel>File Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => setShowCreateNewFolderDialog(true)}>
               New Folder
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setShowShareDialog(true)}>
-              Folder Upload
             </DropdownMenuItem>
             <DriveUploadButton folderId={props.folderId}/>
           </DropdownMenuGroup>
@@ -84,42 +81,6 @@ export default function UploadDropDownFileAndFolder(props: {folderId: number}) {
               </DialogClose>
             </DialogFooter>
           </form>  
-        </DialogContent>
-      </Dialog>
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Share File</DialogTitle>
-            <DialogDescription>
-              Anyone with the link will be able to view this file.
-            </DialogDescription>
-          </DialogHeader>
-          <FieldGroup className="py-3">
-            <Field>
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="shadcn@vercel.com"
-                autoComplete="off"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="message">Message (Optional)</FieldLabel>
-              <Textarea
-                id="message"
-                name="message"
-                placeholder="Check out this file"
-              />
-            </Field>
-          </FieldGroup>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button type="submit">Send Invite</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

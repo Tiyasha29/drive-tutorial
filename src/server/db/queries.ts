@@ -1,9 +1,13 @@
 import {
   files_table as filesSchema,
   folders_table as foldersSchema,
+  users_table,
+  users_table as usersSchema,
 } from "~/server/db/schema";
 import { db } from "~/server/db";
 import { eq, isNull, and, sql, desc } from "drizzle-orm";
+import { updateLastModifiedAtAllParents } from "~/app/utility-functions/update-last-modified-at-all-parents";
+import { formatFileSize } from "~/app/utility-functions/format-file-size";
 
 export const QUERIES = {
   getAllParentsForFolder: async function (folderId: number) {
@@ -77,6 +81,15 @@ export const QUERIES = {
 
     return folders;
   },
+
+  getUserByUserId: async function (userId: string) {
+    const users = await db
+      .select()
+      .from(usersSchema)
+      .where(eq(usersSchema.userId, userId));
+
+    return users[0];
+  },
 };
 
 export const MUTATIONS = {
@@ -109,11 +122,16 @@ export const MUTATIONS = {
       );
     }
 
-    // return Promise.all([
-    //   fileCreated,
-    //   MUTATIONS.updateLastModifiedAt(input.file.parent),
-    // ]);
+    await db
+      .update(usersSchema)
+      .set({
+        numberOfFilesUploaded: sql`${usersSchema.numberOfFilesUploaded} + ${1}`,
+      })
+      .where(eq(usersSchema.userId, input.userId));
+
+    await MUTATIONS.addToSizeUsedByUser(input.userId, input.file.sizeInBytes);
   },
+
   createFolder: async function (input: {
     folder: {
       name: string;
@@ -132,23 +150,15 @@ export const MUTATIONS = {
       //   MUTATIONS.updateLastModifiedAt(input.folder.parent),
       // ]);
 
-      let currentParentFolder = await QUERIES.getFolderById(
-        input.folder.parent,
-      );
-
-      while (currentParentFolder) {
-        await MUTATIONS.updateLastModifiedAtFolder(currentParentFolder.id);
-
-        // If this folder has no parent, stop climbing
-        if (!currentParentFolder.parent || currentParentFolder.parent === 0) {
-          break;
-        }
-
-        currentParentFolder = await QUERIES.getFolderById(
-          currentParentFolder.parent,
-        );
-      }
+      updateLastModifiedAtAllParents(input.folder.parent);
     }
+
+    await db
+      .update(usersSchema)
+      .set({
+        numberOfFoldersUploaded: sql`${usersSchema.numberOfFoldersUploaded} + ${1}`,
+      })
+      .where(eq(usersSchema.userId, input.userId));
   },
 
   updateLastModifiedAtFolder: async function (folderId: number) {
@@ -203,6 +213,69 @@ export const MUTATIONS = {
       .update(foldersSchema)
       .set({ name: input.folderNameToBeRenamed })
       .where(eq(foldersSchema.id, input.folderId));
+  },
+
+  addUser: async function (user: {
+    userId: string;
+    name: string;
+    email: string;
+    profilePictureUrl: string;
+  }) {
+    await db.insert(usersSchema).values({
+      userId: user.userId,
+      name: user.name,
+      email: user.email,
+      profilePictureurl: user.profilePictureUrl,
+    });
+  },
+
+  addToSizeUsedByUser: async function (userId: string, sizeInBytes: number) {
+    await db
+      .update(usersSchema)
+      .set({
+        sizeInBytesUsed: sql`${usersSchema.sizeInBytesUsed} + ${sizeInBytes}`,
+      })
+      .where(eq(usersSchema.userId, userId));
+
+    const users = await db
+      .select()
+      .from(usersSchema)
+      .where(eq(usersSchema.userId, userId));
+
+    const { fileSize: sizeUsed, fileSizeUnit: sizeUnitUsed } = formatFileSize(
+      users[0]?.sizeInBytesUsed ?? 0,
+    );
+
+    await db
+      .update(usersSchema)
+      .set({ sizeUsed, sizeUnitUsed })
+      .where(eq(usersSchema.userId, userId));
+  },
+
+  subtractFromSizeUsedByUser: async function (
+    userId: string,
+    sizeInBytes: number,
+  ) {
+    await db
+      .update(usersSchema)
+      .set({
+        sizeInBytesUsed: sql`${usersSchema.sizeInBytesUsed} - ${sizeInBytes}`,
+      })
+      .where(eq(usersSchema.userId, userId));
+
+    const users = await db
+      .select()
+      .from(usersSchema)
+      .where(eq(usersSchema.userId, userId));
+
+    const { fileSize: sizeUsed, fileSizeUnit: sizeUnitUsed } = formatFileSize(
+      users[0]?.sizeInBytesUsed ?? 0,
+    );
+
+    await db
+      .update(usersSchema)
+      .set({ sizeUsed, sizeUnitUsed })
+      .where(eq(usersSchema.userId, userId));
   },
 
   onboardUser: async function (userId: string) {

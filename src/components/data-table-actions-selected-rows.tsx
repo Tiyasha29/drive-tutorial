@@ -31,7 +31,16 @@ export type Files = typeof files_table.$inferSelect;
 
 export default function DataTableActionsSelectedRows(props: { selectedRows: Row<Folders | Files>[] }) {
   const { selectedRows } = props;
-  const typeOfSelectedRows = selectedRows[0]?.original.type;
+  //const typeOfSelectedRows = selectedRows[0]?.original.type;
+  const selectedFolderRowsIds = selectedRows
+  .filter((selectedRow) => selectedRow.original.type === "folder")
+  .map((selectedRow) => selectedRow.original.id);
+
+
+  const selectedFileRowsIds = selectedRows
+  .filter((selectedRow) => selectedRow.original.type === "file")
+  .map((selectedRow) => selectedRow.original.id);
+  
   const router = useRouter();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -82,11 +91,8 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={async() => {
-                if(typeOfSelectedRows === "folder"){
-                  server_deleteFolder(selectedRows.map((selectedRow) => selectedRow.original.id));
-                } else {
-                  server_deleteFile(selectedRows.map((selectedRow) => selectedRow.original.id));
-                }
+                server_deleteFolder(selectedFolderRowsIds);
+                server_deleteFile(selectedFileRowsIds);
               }}>Continue</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
