@@ -104,7 +104,7 @@ export function DataTable<TData, TValue>({
                 onClick={() => { return }}
               >
                 {row.getVisibleCells().map((cell) => (
-                   (cell.column.id !== "actions" && cell.column.id !=="select") ?
+                   (cell.column.id !== "actions" && cell.column.id !=="select" && cell.column.id !== "star") ?
                    (<TableCell key={cell.id}>
                      <a href={`${pathname}/${(row.original as { id: number }).id}`}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</a>
                    </TableCell>) : 

@@ -311,3 +311,32 @@ export async function renameFolder(formData: FormData) {
 
   return { success: true };
 }
+
+export async function updateIsStarredFileOrFolder({
+  rowObject,
+  isStarred,
+  pathname,
+}: {
+  rowObject: Folders | Files;
+  isStarred: boolean;
+  pathname: string;
+}) {
+  try {
+    if (rowObject.type === "folder") {
+      await db
+        .update(folders_table)
+        .set({ isStarred })
+        .where(eq(folders_table.id, rowObject.id));
+    } else {
+      await db
+        .update(files_table)
+        .set({ isStarred })
+        .where(eq(files_table.id, rowObject.id));
+    }
+  } catch (e) {
+    throw new Error("Database update failed.");
+  } finally {
+    console.log(pathname);
+    revalidatePath(pathname);
+  }
+}

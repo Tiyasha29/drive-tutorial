@@ -90,6 +90,29 @@ export const QUERIES = {
 
     return users[0];
   },
+
+  getStarredFoldersAndFilesByUserId: async function (userId: string) {
+    const starredFolders = await db
+      .select()
+      .from(foldersSchema)
+      .orderBy(foldersSchema.lastUpdatedAt)
+      .where(
+        and(
+          eq(foldersSchema.ownerId, userId),
+          eq(foldersSchema.isStarred, true),
+        ),
+      );
+
+    const starredFiles = await db
+      .select()
+      .from(filesSchema)
+      .orderBy(filesSchema.lastUpdatedAt)
+      .where(
+        and(eq(filesSchema.ownerId, userId), eq(filesSchema.isStarred, true)),
+      );
+
+    return [...starredFolders, ...starredFiles];
+  },
 };
 
 export const MUTATIONS = {

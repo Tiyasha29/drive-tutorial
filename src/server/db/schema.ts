@@ -6,6 +6,7 @@ import {
   timestamp,
   float,
   int,
+  boolean,
 } from "drizzle-orm/singlestore-core";
 
 export const createTable = singlestoreTableCreator(
@@ -26,6 +27,7 @@ export const files_table = createTable(
     sizeUnit: text("size_unit", { enum: ["bytes", "KB", "MB", "GB"] })
       .notNull()
       .default("bytes"),
+    isStarred: boolean("is_starred").notNull().default(false),
     url: text("url").notNull(),
     parent: bigint("parent", { mode: "number", unsigned: true }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -55,6 +57,7 @@ export const folders_table = createTable(
     sizeUnit: text("size_unit", { enum: ["bytes", "KB", "MB", "GB"] })
       .notNull()
       .default("bytes"),
+    isStarred: boolean("is_starred").notNull().default(false),
     parent: bigint("parent", { mode: "number", unsigned: true }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),

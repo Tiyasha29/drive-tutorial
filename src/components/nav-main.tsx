@@ -27,13 +27,11 @@ export function NavMain({
 }) {
 
   const { data: server_user } = useQuery({
-    queryKey: ["user"],
+    queryKey: [{ userId }],
     queryFn: () => getUserById(userId),
     enabled: !!userId,
     
   })
-
-  console.log(((server_user?.sizeInBytesUsed ?? 0) / 10485760) * 100)
 
   return (
     <SidebarGroup>

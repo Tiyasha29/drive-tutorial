@@ -19,6 +19,12 @@ import DataTableActionsSelectedRows from "~/components/data-table-actions-select
 
 import { Folder as FolderIcon, File as FileIcon } from 'lucide-react';
 
+import {
+  IconStar,
+  IconStarFilled
+} from "@tabler/icons-react"
+import StarAction from "~/components/star-action"
+
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
@@ -53,6 +59,12 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     id: "icon",
     cell: ({ row }) => {
       return (row.original.type === "folder") ? <FolderIcon/> : <FileIcon/>
+    }
+  },
+  {
+    id: "star",
+    cell: ({ row }) => {
+      return <StarAction row={row} />
     }
   },
   {
