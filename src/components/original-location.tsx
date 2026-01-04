@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getFolderById } from "~/server/actions";
 
-export default function OriginalLocationForBin({ id }: {id: number}) {
+export default function OriginalLocation({ id }: {id: number}) {
   if(id === 0) {
     return <div>My Drive</div>;
   }

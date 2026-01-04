@@ -14,16 +14,12 @@ import {
 } from "~/components/ui/dropdown-menu"
 import { folders_table, files_table } from "~/server/db/schema"
 
-import { deleteFile, deleteFolder, renameFile } from "~/server/actions"
+import { deleteFile, deleteFolder, moveToBinFile, moveToBinFolder, renameFile } from "~/server/actions"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal, MoreHorizontalIcon } from "lucide-react"
 import type { Row } from "@tanstack/react-table"
 import { useMutation } from "@tanstack/react-query"
-import { Input } from "./ui/input"
-import { useState } from "react"
-import { Field, FieldGroup, FieldLabel } from "./ui/field"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog"
 
 
 export type Folders = typeof folders_table.$inferSelect;
@@ -43,18 +39,16 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
   
   const router = useRouter();
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-
-  const { mutate: server_deleteFile } = useMutation({
-    mutationFn: deleteFile,
+  const { mutate: server_moveToBinFile } = useMutation({
+    mutationFn: moveToBinFile,
     
     onSuccess: () => {
       router.refresh();
     }
   })
 
-  const { mutate: server_deleteFolder } = useMutation({
-    mutationFn: deleteFolder,
+  const { mutate: server_moveToBinFolder } = useMutation({
+    mutationFn: moveToBinFolder,
 
     onSuccess: () => {
       router.refresh();
@@ -72,31 +66,16 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
         <DropdownMenuContent className="w-40" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
-              Delete Selected
+            <DropdownMenuItem onClick={async() => {
+                server_moveToBinFolder(selectedFolderRowsIds);
+                server_moveToBinFile(selectedFileRowsIds);
+              }}>
+              Move to bin
             </DropdownMenuItem>
             <DropdownMenuItem disabled>Download</DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                data and remove your data from our servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={async() => {
-                server_deleteFolder(selectedFolderRowsIds);
-                server_deleteFile(selectedFileRowsIds);
-              }}>Continue</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
     </>
   )
 }

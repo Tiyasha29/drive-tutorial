@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-"use client";
+"use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
@@ -19,11 +19,14 @@ import DataTableActionsSelectedRows from "~/components/data-table-actions-select
 
 import { Folder as FolderIcon, File as FileIcon } from 'lucide-react';
 
+import {
+  IconStar,
+  IconStarFilled
+} from "@tabler/icons-react"
+import StarAction from "~/components/star-action"
 import DataTableActionsForBinFile from "~/components/data-table-actions-for-bin-file"
 import DataTableActionsForBinFolder from "~/components/data-table-actions-for-bin-folder"
-import OriginalLocationForBin from "~/components/original-location";
-import OriginalLocation from "~/components/original-location";
-import DataTableActionsForBinSelectedRows from "~/components/data-table-actions-for-bin-selected-rows";
+import OriginalLocation from "~/components/original-location"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -62,6 +65,12 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     }
   },
   {
+    id: "star",
+    cell: ({ row }) => {
+      return <StarAction row={row} />
+    }
+  },
+  {
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -76,12 +85,12 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     }
   },
   {
-    accessorKey: "binnedAt",
-    header: "Date binned",
+    accessorKey: "lastUpdatedAt",
+    header: "Last modified",
     cell: ({ row }) => {
 
       dayjs.extend(localizedFormat);
-      const formattedDate = dayjs(new Date(row.getValue("binnedAt"))).format('lll');
+      const formattedDate = dayjs(new Date(row.getValue("lastUpdatedAt"))).format('lll');
   
       return <div>{formattedDate}</div>;
     }
@@ -100,11 +109,11 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     }
   },
   {
-    accessorKey: "originalLocation",
-    header: "Original location",
+    accessorKey: "location",
+    header: "Location",
     cell: ({ row }) => {
       return (
-      <OriginalLocation id={row.original.parent ?? 0}/>
+        <OriginalLocation id={row.original.parent ?? 0}/>
       )
       
     }
@@ -113,7 +122,7 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     id: "actions",
     header: ({ table }) => {
       return (
-        <DataTableActionsForBinSelectedRows selectedRows={table.getSelectedRowModel().rows}/>
+        <DataTableActionsSelectedRows selectedRows={table.getSelectedRowModel().rows}/>
       )
     },
     cell: ({ row }) => {
