@@ -3,7 +3,6 @@ import { MUTATIONS, QUERIES } from "~/server/db/queries"
 import { auth } from "@clerk/nextjs/server"
 import { folders_table, users_table } from "~/server/db/schema";
 import { DataTable } from "~/components/data-table";
-import UploadDropDownFileAndFolder from "~/components/upload-dropdown-file-and-folder";
 import { UserButton } from "@clerk/nextjs";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/components/app-sidebar";
@@ -23,7 +22,9 @@ export default async function DemoPage() {
   if(!userId) {
     throw new Error("Unauthorized");
   }
-  const data = await QUERIES.getStarredFoldersAndFilesByUserId(userId);
+  const fetchedFiles = await QUERIES.getAllFiles();
+  
+  const data = fetchedFiles;
 
   const sizeInBytesUsedByUser = (await db.select().from(users_table).where(eq(users_table.userId, userId)))[0]?.sizeInBytesUsed ?? 0;
 
@@ -38,7 +39,7 @@ export default async function DemoPage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader pageCategory="Starred"/>
+        <SiteHeader pageCategory="My Drive"/>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

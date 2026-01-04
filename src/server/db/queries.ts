@@ -5,7 +5,7 @@ import {
   users_table as usersSchema,
 } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq, isNull, and, sql, desc } from "drizzle-orm";
+import { eq, isNull, and, sql, desc, or, inArray } from "drizzle-orm";
 import { updateLastModifiedAtAllParents } from "~/app/utility-functions/update-last-modified-at-all-parents";
 import { formatFileSize } from "~/app/utility-functions/format-file-size";
 
@@ -49,11 +49,38 @@ export const QUERIES = {
     return db
       .select()
       .from(filesSchema)
-      .where(eq(filesSchema.parent, folderId))
+      .where(
+        and(eq(filesSchema.parent, folderId), eq(filesSchema.isBinned, false)),
+      )
       .orderBy(filesSchema.id);
   },
 
   getFolders: function (folderId: number) {
+    return db
+      .select()
+      .from(foldersSchema)
+      .where(
+        and(
+          eq(foldersSchema.parent, folderId),
+          eq(foldersSchema.isBinned, false),
+        ),
+      )
+      .orderBy(foldersSchema.id);
+  },
+
+  getAllFiles: function () {
+    return db.select().from(filesSchema).orderBy(desc(filesSchema.createdAt));
+  },
+
+  getFilesForBin: function (folderId: number) {
+    return db
+      .select()
+      .from(filesSchema)
+      .where(eq(filesSchema.parent, folderId))
+      .orderBy(filesSchema.id);
+  },
+
+  getFoldersForBin: function (folderId: number) {
     return db
       .select()
       .from(foldersSchema)
@@ -112,6 +139,57 @@ export const QUERIES = {
       );
 
     return [...starredFolders, ...starredFiles];
+  },
+
+  getFoldersAndFilesForBinPageByUserId: async function (userId: string) {
+    const binnedFolders = await db
+      .select()
+      .from(foldersSchema)
+      .orderBy(foldersSchema.lastUpdatedAt)
+      .where(
+        and(
+          eq(foldersSchema.ownerId, userId),
+          eq(foldersSchema.isBinned, true),
+        ),
+      );
+
+    const filteredBinnedFolders: typeof binnedFolders = [];
+    for (const binnedFolder of binnedFolders) {
+      // include root-level binned items (parent === 0 or null)...
+      if (binnedFolder.parent === 0 || binnedFolder.parent == null) {
+        filteredBinnedFolders.push(binnedFolder);
+        continue;
+      }
+
+      // ...or include only if their parent exists and is not binned
+      const parent = await QUERIES.getFolderById(binnedFolder.parent);
+      if (parent && parent.isBinned === false) {
+        filteredBinnedFolders.push(binnedFolder);
+      }
+    }
+
+    const binnedFiles = await db
+      .select()
+      .from(filesSchema)
+      .orderBy(filesSchema.lastUpdatedAt)
+      .where(
+        and(eq(filesSchema.ownerId, userId), eq(filesSchema.isBinned, true)),
+      );
+
+    const filteredBinnedFiles: typeof binnedFiles = [];
+    for (const binnedFile of binnedFiles) {
+      if (binnedFile.parent === 0 || binnedFile.parent == null) {
+        filteredBinnedFiles.push(binnedFile);
+        continue;
+      }
+
+      const parent = await QUERIES.getFolderById(binnedFile.parent);
+      if (parent && parent.isBinned === false) {
+        filteredBinnedFiles.push(binnedFile);
+      }
+    }
+
+    return [...filteredBinnedFolders, ...filteredBinnedFiles];
   },
 };
 
@@ -299,6 +377,34 @@ export const MUTATIONS = {
       .update(usersSchema)
       .set({ sizeUsed, sizeUnitUsed })
       .where(eq(usersSchema.userId, userId));
+  },
+
+  updateIsBinnedForDeletingFile: async function (fileIds: number[]) {
+    await db
+      .update(filesSchema)
+      .set({ isBinned: true, binnedAt: new Date() })
+      .where(inArray(filesSchema.id, fileIds));
+  },
+
+  updateIsBinnedForDeletingFolder: async function (folderIds: number[]) {
+    await db
+      .update(foldersSchema)
+      .set({ isBinned: true, binnedAt: new Date() })
+      .where(inArray(foldersSchema.id, folderIds));
+  },
+
+  updateIsBinnedForRestoringFile: async function (fileIds: number[]) {
+    await db
+      .update(filesSchema)
+      .set({ isBinned: false })
+      .where(inArray(filesSchema.id, fileIds));
+  },
+
+  updateIsBinnedForRestoringFolder: async function (folderIds: number[]) {
+    await db
+      .update(foldersSchema)
+      .set({ isBinned: false })
+      .where(inArray(foldersSchema.id, folderIds));
   },
 
   onboardUser: async function (userId: string) {

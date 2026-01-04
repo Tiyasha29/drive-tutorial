@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/dropdown-menu"
 import { folders_table, files_table } from "~/server/db/schema"
 
-import { deleteFile, deleteFolder, renameFile } from "~/server/actions"
+import { deleteFile, deleteFolder, moveToBinFile, renameFile } from "~/server/actions"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal, MoreHorizontalIcon } from "lucide-react"
@@ -44,6 +44,14 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
     }
   })
 
+  const { mutate: server_moveFileToBin } = useMutation({
+    mutationFn: moveToBinFile,
+    
+    onSuccess: () => {
+      router.refresh();
+    }
+  })
+
   const { mutate: server_renameFile } = useMutation({
     mutationFn: renameFile,
 
@@ -66,8 +74,8 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
             <DropdownMenuItem onSelect={() => setShowRenameDialog(true)}>
               Rename
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
-              Delete
+            <DropdownMenuItem onSelect={() => server_moveFileToBin([row.original.id])}>
+              Move to bin
             </DropdownMenuItem>
             <DropdownMenuItem disabled>Download</DropdownMenuItem>
           </DropdownMenuGroup>
@@ -101,7 +109,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
           </form>
         </DialogContent>
       </Dialog>
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        {/* <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -117,7 +125,7 @@ export default function DataTableActionsFile(props: { row: Row<Folders | Files> 
               }}>Continue</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
-        </AlertDialog>
+        </AlertDialog> */}
     </>
   )
 }

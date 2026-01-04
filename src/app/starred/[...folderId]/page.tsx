@@ -1,6 +1,7 @@
 import { QUERIES } from "~/server/db/queries"
-import { columns, type Files, type Folders } from "../columns";
+import { columns, type Files, type Folders } from "~/app/my-drive/columns";
 import DriveUploadButton from "~/components/drive-upload-button";
+import UploadDropDownFileAndFolder from "~/components/upload-dropdown-file-and-folder";
 import { DataTable } from "~/components/data-table";
 import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";

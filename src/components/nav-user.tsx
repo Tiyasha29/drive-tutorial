@@ -29,6 +29,7 @@ import {
   useSidebar,
 } from "./ui/sidebar"
 import { useRouter } from "next/navigation"
+import { SignOutButton } from "@clerk/nextjs"
 
 export function NavUser({
   user,
@@ -53,7 +54,7 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">{user.name.split(" ").map((partOfName) => partOfName.charAt(0))}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -104,7 +105,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconLogout />
-              Log out
+              <SignOutButton/>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

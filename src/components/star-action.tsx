@@ -16,7 +16,7 @@ export default function StarAction({ row }: { row: Row<Folders | Files> }) {
 
   const pathname = usePathname();
 
-  const  [ isPending, startTransition ] = useTransition()
+  const  [ isPending, startTransition ] = useTransition();
 
   const [ optimisticRowObject, updateStarred ] = useOptimistic(rowObject, ( rowObject, isStarred: boolean) => {
     return  { ...rowObject, isStarred }

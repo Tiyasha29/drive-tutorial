@@ -3,7 +3,6 @@ import { MUTATIONS, QUERIES } from "~/server/db/queries"
 import { auth } from "@clerk/nextjs/server"
 import { folders_table, users_table } from "~/server/db/schema";
 import { DataTable } from "~/components/data-table";
-import UploadDropDownFileAndFolder from "~/components/upload-dropdown-file-and-folder";
 import { UserButton } from "@clerk/nextjs";
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar";
 import { AppSidebar } from "~/components/app-sidebar";
@@ -41,7 +40,7 @@ export default async function DemoPage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader pageCategory="My Drive"/>
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

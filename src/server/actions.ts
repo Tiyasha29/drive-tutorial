@@ -9,64 +9,21 @@ import { MUTATIONS, QUERIES } from "./db/queries";
 import { revalidatePath } from "next/cache";
 import { updateLastModifiedAtAllParents } from "~/app/utility-functions/update-last-modified-at-all-parents";
 import { subtractFromFolderSizeAllParents } from "~/app/utility-functions/subtract-from-folder-size-all-parents";
+import { addToFolderSizeAllParents } from "~/app/utility-functions/add-to-folder-size-all-parents";
 
 export type Folders = typeof folders_table.$inferSelect;
 export type Files = typeof files_table.$inferSelect;
-
-// export async function deleteFolder(folderIds: number[]) {
-//   const session = await auth();
-//   const utApi = new UTApi();
-
-//   if (!session.userId) {
-//     return { error: "Unauthorized" };
-//   }
-
-//   const folders = await db
-//     .select()
-//     .from(folders_table)
-//     .where(
-//       and(
-//         inArray(folders_table.id, folderIds),
-//         eq(folders_table.ownerId, session.userId),
-//       ),
-//     );
-
-//   const files = await db
-//     .select()
-//     .from(files_table)
-//     .where(inArray(files_table.parent, folderIds));
-
-//   if (folders.length === 0) {
-//     return { error: "Folder Not Found" };
-//   }
-
-//   await db.delete(files_table).where(inArray(files_table.parent, folderIds));
-//   await db.delete(folders_table).where(inArray(folders_table.id, folderIds));
-
-//   const filesDeleteKeys = files.map((file) =>
-//     file.url.replace("https://ebt4rxu2e3.ufs.sh/f/", ""),
-//   );
-
-//   await utApi.deleteFiles(filesDeleteKeys);
-
-//   folders.forEach(async (folder) => {
-//     if (folder.parent === null) folder.parent = 0; //Can be deleted later - changed all folder parent ids to 0 for home page
-//     updateLastModifiedAtAllParents(folder.parent);
-
-//     subtractFromFolderSizeAllParents({
-//       size: folder.size,
-//       parentFolderId: folder.parent,
-//     });
-//   });
-
-//   return { success: true };
-// }
 
 export async function getUserById(userId: string) {
   const user = await QUERIES.getUserByUserId(userId);
   if (user !== undefined) {
     return user;
   }
+}
+
+export async function getFolderById(id: number) {
+  const folder = await QUERIES.getFolderById(id);
+  return folder;
 }
 
 export async function deleteFolder(folderIds: number[]) {
@@ -146,16 +103,6 @@ export async function deleteFolder(folderIds: number[]) {
   // Delete all folders from DB
   await db.delete(folders_table).where(inArray(folders_table.id, allFolderIds));
 
-  folders.forEach(async (folder) => {
-    if (folder.parent === null) folder.parent = 0; //Can be deleted later - changed all folder parent ids to 0 for home page
-    updateLastModifiedAtAllParents(folder.parent);
-
-    subtractFromFolderSizeAllParents({
-      size: folder.size,
-      parentFolderId: folder.parent,
-    });
-  });
-
   await db
     .update(users_table)
     .set({
@@ -199,13 +146,6 @@ export async function deleteFile(fileIds: number[]) {
   let totalSizeInBytesToBeSubtracted = 0;
 
   files.forEach(async (file) => {
-    updateLastModifiedAtAllParents(file.parent);
-
-    subtractFromFolderSizeAllParents({
-      size: file.sizeInBytes,
-      parentFolderId: file.parent,
-    });
-
     totalSizeInBytesToBeSubtracted += file.sizeInBytes;
   });
 
@@ -339,4 +279,206 @@ export async function updateIsStarredFileOrFolder({
     console.log(pathname);
     revalidatePath(pathname);
   }
+}
+
+export async function moveToBinFile(fileIds: number[]) {
+  const session = await auth();
+
+  if (!session.userId) {
+    return { error: "Unauthorized" };
+  }
+
+  const files = await db
+    .select()
+    .from(files_table)
+    .where(
+      and(
+        inArray(files_table.id, fileIds),
+        eq(files_table.ownerId, session.userId),
+      ),
+    );
+
+  if (files.length === 0) {
+    return { error: "File not found" };
+  }
+
+  await MUTATIONS.updateIsBinnedForDeletingFile(fileIds);
+
+  files.forEach(async (file) => {
+    updateLastModifiedAtAllParents(file.parent);
+
+    subtractFromFolderSizeAllParents({
+      size: file.sizeInBytes,
+      parentFolderId: file.parent,
+    });
+  });
+
+  return { success: true };
+}
+
+export async function moveToBinFolder(folderIds: number[]) {
+  const session = await auth();
+  const utApi = new UTApi();
+
+  if (!session.userId) {
+    return { error: "Unauthorized" };
+  }
+
+  const folders = await db
+    .select()
+    .from(folders_table)
+    .where(
+      and(
+        inArray(folders_table.id, folderIds),
+        eq(folders_table.ownerId, session.userId),
+      ),
+    );
+
+  //Collect ALL descendant folders recursively
+  async function getAllDescendantFolders(ids: number[]): Promise<number[]> {
+    const children = await db
+      .select()
+      .from(folders_table)
+      .where(inArray(folders_table.parent, ids)); //children of all selected folders
+
+    if (children.length === 0) return ids;
+
+    const childIds = children.map((f) => f.id); //storing ids of all children in childIds
+
+    const deeper = await getAllDescendantFolders(childIds); //recursively calling with new child IDs as IDs
+
+    return [...ids, ...childIds, ...deeper];
+  }
+
+  // get all folders we need to move to bin (selected + children)
+  const allFolderIds = Array.from(
+    new Set(await getAllDescendantFolders(folderIds)),
+  );
+
+  // Get all files in all of these folders
+  const allFiles = await db
+    .select()
+    .from(files_table)
+    .where(inArray(files_table.parent, allFolderIds));
+
+  const allFileIds = allFiles.map((file) => file.id);
+
+  // Bin all files
+  await MUTATIONS.updateIsBinnedForDeletingFile(allFileIds);
+
+  // Bin all folders
+  await MUTATIONS.updateIsBinnedForDeletingFolder(allFolderIds);
+
+  folders.forEach(async (folder) => {
+    if (folder.parent === null) folder.parent = 0; //Can be deleted later - changed all folder parent ids to 0 for home page
+    updateLastModifiedAtAllParents(folder.parent);
+
+    subtractFromFolderSizeAllParents({
+      size: folder.size,
+      parentFolderId: folder.parent,
+    });
+  });
+
+  return { success: true };
+}
+
+export async function restoreFile(fileIds: number[]) {
+  const session = await auth();
+
+  if (!session.userId) {
+    return { error: "Unauthorized" };
+  }
+
+  const files = await db
+    .select()
+    .from(files_table)
+    .where(
+      and(
+        inArray(files_table.id, fileIds),
+        eq(files_table.ownerId, session.userId),
+      ),
+    );
+
+  if (files.length === 0) {
+    return { error: "File not found" };
+  }
+
+  await MUTATIONS.updateIsBinnedForRestoringFile(fileIds);
+
+  files.forEach(async (file) => {
+    updateLastModifiedAtAllParents(file.parent);
+
+    addToFolderSizeAllParents({
+      size: file.sizeInBytes,
+      parentFolderId: file.parent,
+    });
+  });
+
+  return { success: true };
+}
+
+export async function restoreFolder(folderIds: number[]) {
+  const session = await auth();
+  const utApi = new UTApi();
+
+  if (!session.userId) {
+    return { error: "Unauthorized" };
+  }
+
+  const folders = await db
+    .select()
+    .from(folders_table)
+    .where(
+      and(
+        inArray(folders_table.id, folderIds),
+        eq(folders_table.ownerId, session.userId),
+      ),
+    );
+
+  //Collect ALL descendant folders recursively
+  async function getAllDescendantFolders(ids: number[]): Promise<number[]> {
+    const children = await db
+      .select()
+      .from(folders_table)
+      .where(inArray(folders_table.parent, ids)); //children of all selected folders
+
+    if (children.length === 0) return ids;
+
+    const childIds = children.map((f) => f.id); //storing ids of all children in childIds
+
+    const deeper = await getAllDescendantFolders(childIds); //recursively calling with new child IDs as IDs
+
+    return [...ids, ...childIds, ...deeper];
+  }
+
+  // get all folders we need to restore (selected + children)
+  const allFolderIds = Array.from(
+    new Set(await getAllDescendantFolders(folderIds)),
+  );
+
+  // Get all files in all of these folders
+  const allFiles = await db
+    .select()
+    .from(files_table)
+    .where(inArray(files_table.parent, allFolderIds));
+
+  const allFileIds = allFiles.map((file) => file.id);
+
+  // Restore all files
+  await MUTATIONS.updateIsBinnedForRestoringFile(allFileIds);
+
+  // Restore all folders
+  await MUTATIONS.updateIsBinnedForRestoringFolder(allFolderIds);
+
+  folders.forEach(async (folder) => {
+    if (folder.parent === null) folder.parent = 0; //Can be deleted later - changed all folder parent ids to 0 for home page
+    updateLastModifiedAtAllParents(folder.parent);
+
+    addToFolderSizeAllParents({
+      size: folder.size,
+      parentFolderId: folder.parent,
+    });
+  });
+
+  return { success: true };
 }

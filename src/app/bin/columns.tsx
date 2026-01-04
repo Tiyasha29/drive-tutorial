@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-"use client"
+"use client";
 
 import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
@@ -26,6 +26,7 @@ import {
 import StarAction from "~/components/star-action"
 import DataTableActionsForBinFile from "~/components/data-table-actions-for-bin-file"
 import DataTableActionsForBinFolder from "~/components/data-table-actions-for-bin-folder"
+import OriginalLocationForBin from "~/components/original-location-for-bin";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -64,12 +65,6 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     }
   },
   {
-    id: "star",
-    cell: ({ row }) => {
-      return <StarAction row={row} />
-    }
-  },
-  {
     accessorKey: "name",
     header: ({ column }) => {
       return (
@@ -84,12 +79,12 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
     }
   },
   {
-    accessorKey: "lastUpdatedAt",
-    header: "Last modified",
+    accessorKey: "binnedAt",
+    header: "Date binned",
     cell: ({ row }) => {
 
       dayjs.extend(localizedFormat);
-      const formattedDate = dayjs(new Date(row.getValue("lastUpdatedAt"))).format('lll');
+      const formattedDate = dayjs(new Date(row.getValue("binnedAt"))).format('lll');
   
       return <div>{formattedDate}</div>;
     }
@@ -104,6 +99,16 @@ export const columns: ColumnDef<(Folders | Files)>[] = [
         const { fileSize, fileSizeUnit } = formatFileSize(row.original.size);
         return <div>{`${fileSize} ${fileSizeUnit}`}</div>
       }
+      
+    }
+  },
+  {
+    accessorKey: "originalLocation",
+    header: "Original location",
+    cell: ({ row }) => {
+      return (
+      <OriginalLocationForBin id={row.original.parent ?? 0}/>
+      )
       
     }
   },

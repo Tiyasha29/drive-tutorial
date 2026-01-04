@@ -28,6 +28,8 @@ export const files_table = createTable(
       .notNull()
       .default("bytes"),
     isStarred: boolean("is_starred").notNull().default(false),
+    isBinned: boolean("is_binned").notNull().default(false),
+    binnedAt: timestamp("binned_at"),
     url: text("url").notNull(),
     parent: bigint("parent", { mode: "number", unsigned: true }).notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -58,6 +60,8 @@ export const folders_table = createTable(
       .notNull()
       .default("bytes"),
     isStarred: boolean("is_starred").notNull().default(false),
+    isBinned: boolean("is_binned").notNull().default(false),
+    binnedAt: timestamp("binned_at"),
     parent: bigint("parent", { mode: "number", unsigned: true }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),

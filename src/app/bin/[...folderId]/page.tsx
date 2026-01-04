@@ -1,5 +1,5 @@
 import { QUERIES } from "~/server/db/queries"
-import { columns, type Files, type Folders } from "../columns";
+import { columns, type Files, type Folders } from "~/app/my-drive/columns";
 import DriveUploadButton from "~/components/drive-upload-button";
 import { DataTable } from "~/components/data-table";
 import { auth } from "@clerk/nextjs/server";
@@ -28,8 +28,8 @@ export default async function DemoPage(props: { params: Promise<{ folderId: stri
   const folderIdArray = (await props.params).folderId;
   const lastFolderIdInURL = parseInt(folderIdArray[folderIdArray.length - 1] ?? "0")
   
-  const fetchedFiles = await QUERIES.getFiles(lastFolderIdInURL);
-  const fetchedFolders = await QUERIES.getFolders(lastFolderIdInURL);
+  const fetchedFiles = await QUERIES.getFilesForBin(lastFolderIdInURL);
+  const fetchedFolders = await QUERIES.getFoldersForBin(lastFolderIdInURL);
   const data = [...fetchedFolders, ...fetchedFiles];
   
 

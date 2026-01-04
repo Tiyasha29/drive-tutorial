@@ -52,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   user: {
     name: accountUser?.fullName ?? "Not found",
     email: accountUser?.emailAddresses[0]?.emailAddress ?? "Not found",
-    avatar: "#",
+    avatar: accountUser?.imageUrl ?? "#",
   },
   navMain: [
     {
@@ -67,12 +67,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     {
       title: "Bin",
-      url: "#",
+      url: "/bin",
       icon: IconTrash,
     },
     {
       title: "Recent",
-      url: "#",
+      url: "/recent",
       icon: IconClock,
     },
     {
@@ -140,11 +140,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: IconHelp,
     },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
+    // {
+    //   title: "Search",
+    //   url: "#",
+    //   icon: IconSearch,
+    // },
   ],
   documents: [
     {
