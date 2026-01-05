@@ -29,7 +29,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
 }
 
-export function DataTableRecent<TData, TValue>({
+export function DataTableRecentAndStorage<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {

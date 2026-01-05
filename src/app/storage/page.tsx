@@ -9,7 +9,7 @@ import { AppSidebar } from "~/components/app-sidebar";
 import { SiteHeader } from "~/components/site-header";
 import { db } from "~/server/db";
 import { eq } from "drizzle-orm";
-import { DataTableRecent } from "~/components/data-table-recent";
+import { DataTableRecentAndStorage } from "~/components/data-table-recent-and-storage";
 
 
 type FolderNameType = typeof folders_table.$inferSelect.name;
@@ -44,7 +44,7 @@ export default async function DemoPage() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <DataTableRecent columns={columns} data={data} />
+              <DataTableRecentAndStorage columns={columns} data={data} />
             </div>
           </div>
         </div>
