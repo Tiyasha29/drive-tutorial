@@ -14,10 +14,13 @@ import { useQuery } from "@tanstack/react-query"
 import { getUserById } from "~/server/actions"
 import dayjs from "dayjs"
 import localizedFormat from 'dayjs/plugin/localizedFormat'
+import { PencilIcon } from "lucide-react"
+import ProfilePicture from "~/components/profile-picture"
 
 export default async function UserProfilePage() {
   const { userId } = await auth()
   const user = await currentUser()
+
 
   if (!userId || !user) return null
 
@@ -33,12 +36,7 @@ export default async function UserProfilePage() {
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-6">
-          <Avatar className="h-20 w-20">
-            <AvatarImage src={user.imageUrl} />
-            <AvatarFallback>
-              {user.firstName?.[0]}
-            </AvatarFallback>
-          </Avatar>
+          <ProfilePicture imageUrl={user.imageUrl} firstName={user.firstName ?? ""}/>
 
           <div className="flex-1">
             <CardTitle className="text-xl">
@@ -50,7 +48,6 @@ export default async function UserProfilePage() {
 
             <div className="mt-2 flex gap-2">
               <Badge variant="secondary">Free Plan</Badge>
-              <Badge variant="outline">Drive Clone</Badge>
             </div>
           </div>
 

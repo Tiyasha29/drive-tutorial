@@ -482,3 +482,13 @@ export async function restoreFolder(folderIds: number[]) {
 
   return { success: true };
 }
+
+export async function updateProfilePictureUrl({
+  profilePictureUrl,
+  userId,
+}: {
+  profilePictureUrl: string;
+  userId: string;
+}) {
+  await MUTATIONS.updateProfilePictureUrl({ profilePictureUrl, userId });
+}

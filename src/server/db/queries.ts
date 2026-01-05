@@ -72,6 +72,10 @@ export const QUERIES = {
     return db.select().from(filesSchema).orderBy(desc(filesSchema.createdAt));
   },
 
+  getAllFilesOrderedBySize: function () {
+    return db.select().from(filesSchema).orderBy(desc(filesSchema.sizeInBytes));
+  },
+
   getFilesForBin: function (folderId: number) {
     return db
       .select()
@@ -405,6 +409,20 @@ export const MUTATIONS = {
       .update(foldersSchema)
       .set({ isBinned: false })
       .where(inArray(foldersSchema.id, folderIds));
+  },
+
+  updateProfilePictureUrl: async function ({
+    profilePictureUrl,
+    userId,
+  }: {
+    profilePictureUrl: string;
+    userId: string;
+  }) {
+    await db
+      .update(usersSchema)
+      .set({ profilePictureurl: profilePictureUrl })
+      .where(eq(usersSchema.userId, userId));
+    console.log(profilePictureUrl);
   },
 
   onboardUser: async function (userId: string) {
