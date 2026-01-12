@@ -1,10 +1,11 @@
-import { UserButton } from "@clerk/nextjs";
+import { ClerkProvider, UserButton } from "@clerk/nextjs";
 import { ModeToggle } from "~/components/mode-toggle";
 
 export default function HomePage({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    <ClerkProvider>
       <div className="container mx-auto px-4">
         <div className="flex justify-between py-4">
         </div>
@@ -12,5 +13,6 @@ export default function HomePage({
           {children}
         </main>
       </div>
+      </ClerkProvider>
   );
 }

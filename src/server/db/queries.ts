@@ -5,7 +5,17 @@ import {
   users_table as usersSchema,
 } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq, isNull, and, sql, desc, or, inArray } from "drizzle-orm";
+import {
+  eq,
+  isNull,
+  and,
+  sql,
+  desc,
+  or,
+  inArray,
+  ne,
+  notInArray,
+} from "drizzle-orm";
 import { updateLastModifiedAtAllParents } from "~/app/utility-functions/update-last-modified-at-all-parents";
 import { formatFileSize } from "~/app/utility-functions/format-file-size";
 
@@ -45,35 +55,60 @@ export const QUERIES = {
     return folder[0];
   },
 
-  getFiles: function (folderId: number) {
+  getFilesByParentIdAndUserId: function ({
+    parentFolderId,
+    userId,
+  }: {
+    parentFolderId: number;
+    userId: string;
+  }) {
     return db
       .select()
       .from(filesSchema)
       .where(
-        and(eq(filesSchema.parent, folderId), eq(filesSchema.isBinned, false)),
+        and(
+          eq(filesSchema.ownerId, userId),
+          eq(filesSchema.parent, parentFolderId),
+          eq(filesSchema.isBinned, false),
+        ),
       )
       .orderBy(filesSchema.id);
   },
 
-  getFolders: function (folderId: number) {
+  getFoldersByParentIdAndUserId: function ({
+    parentFolderId,
+    userId,
+  }: {
+    parentFolderId: number;
+    userId: string;
+  }) {
     return db
       .select()
       .from(foldersSchema)
       .where(
         and(
-          eq(foldersSchema.parent, folderId),
+          eq(foldersSchema.ownerId, userId),
+          eq(foldersSchema.parent, parentFolderId),
           eq(foldersSchema.isBinned, false),
         ),
       )
       .orderBy(foldersSchema.id);
   },
 
-  getAllFiles: function () {
-    return db.select().from(filesSchema).orderBy(desc(filesSchema.createdAt));
+  getAllFilesByOwnerId: function (userId: string) {
+    return db
+      .select()
+      .from(filesSchema)
+      .where(eq(filesSchema.ownerId, userId))
+      .orderBy(desc(filesSchema.createdAt));
   },
 
-  getAllFilesOrderedBySize: function () {
-    return db.select().from(filesSchema).orderBy(desc(filesSchema.sizeInBytes));
+  getAllFilesByOwnerIdOrderedBySize: function (userId: string) {
+    return db
+      .select()
+      .from(filesSchema)
+      .where(eq(filesSchema.ownerId, userId))
+      .orderBy(desc(filesSchema.sizeInBytes));
   },
 
   getFilesForBin: function (folderId: number) {
@@ -194,6 +229,43 @@ export const QUERIES = {
     }
 
     return [...filteredBinnedFolders, ...filteredBinnedFiles];
+  },
+
+  getAllFoldersExceptByIds: async function ({
+    excludedFolderIds,
+    userId,
+  }: {
+    excludedFolderIds: number[];
+    userId: string;
+  }) {
+    const folders = await db
+      .select()
+      .from(foldersSchema)
+      .where(
+        and(
+          eq(foldersSchema.ownerId, userId),
+          eq(foldersSchema.isBinned, false),
+          notInArray(foldersSchema.id, excludedFolderIds),
+        ),
+      );
+
+    return folders;
+  },
+
+  getDOBByUserId: async function (userId: string) {
+    const user = await db
+      .select()
+      .from(usersSchema)
+      .where(eq(usersSchema.userId, userId));
+    return user[0]?.dob;
+  },
+
+  getGenderByUserId: async function (userId: string) {
+    const user = await db
+      .select()
+      .from(usersSchema)
+      .where(eq(usersSchema.userId, userId));
+    return user[0]?.gender;
   },
 };
 
@@ -423,6 +495,57 @@ export const MUTATIONS = {
       .set({ profilePictureurl: profilePictureUrl })
       .where(eq(usersSchema.userId, userId));
     console.log(profilePictureUrl);
+  },
+  updateParentForFileById: async function ({
+    fileId,
+    parentId,
+  }: {
+    fileId: number;
+    parentId: number;
+  }) {
+    await db
+      .update(filesSchema)
+      .set({ parent: parentId })
+      .where(eq(filesSchema.id, fileId));
+  },
+
+  updateParentForFolderById: async function ({
+    folderId,
+    parentId,
+  }: {
+    folderId: number;
+    parentId: number;
+  }) {
+    await db
+      .update(foldersSchema)
+      .set({ parent: parentId })
+      .where(eq(foldersSchema.id, folderId));
+  },
+
+  updateDOBByUserId: async function ({
+    userId,
+    dob,
+  }: {
+    userId: string;
+    dob: Date | undefined;
+  }) {
+    await db
+      .update(usersSchema)
+      .set({ dob })
+      .where(eq(usersSchema.userId, userId));
+  },
+
+  updateGenderByUserId: async function ({
+    userId,
+    gender,
+  }: {
+    userId: string;
+    gender: "Male" | "Female" | "Third Gender" | "Prefer not to disclose";
+  }) {
+    await db
+      .update(usersSchema)
+      .set({ gender })
+      .where(eq(usersSchema.userId, userId));
   },
 
   onboardUser: async function (userId: string) {

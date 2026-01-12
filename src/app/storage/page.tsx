@@ -23,7 +23,7 @@ export default async function DemoPage() {
   if(!userId) {
     throw new Error("Unauthorized");
   }
-  const fetchedFiles = await QUERIES.getAllFilesOrderedBySize();
+  const fetchedFiles = await QUERIES.getAllFilesByOwnerIdOrderedBySize(userId);
   
   const data = fetchedFiles;
 

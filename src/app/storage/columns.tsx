@@ -13,7 +13,6 @@ import { folders_table, type files_table } from "~/server/db/schema"
 import dayjs from "dayjs";
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { formatFileSize } from "../utility-functions/format-file-size"
-import DataTableActionsFile from "~/components/data-table-actions-file"
 import DataTableActionsFolder from "~/components/data-table-actions-folder"
 import DataTableActionsSelectedRows from "~/components/data-table-actions-selected-rows"
 

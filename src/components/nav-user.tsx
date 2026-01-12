@@ -30,6 +30,7 @@ import {
 } from "./ui/sidebar"
 import { useRouter } from "next/navigation"
 import { SignOutButton } from "@clerk/nextjs"
+import UserProfilePage from "~/app/user-profile/[[...rest]]/page"
 
 export function NavUser({
   user,
@@ -96,10 +97,6 @@ export function NavUser({
               <DropdownMenuItem>
                 <IconCreditCard />
                 Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

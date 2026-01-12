@@ -22,8 +22,8 @@ export default async function DemoPage() {
   if(!userId) {
     throw new Error("Unauthorized");
   }
-  const fetchedFolders = await QUERIES.getFolders(0);
-  const fetchedFiles = await QUERIES.getFiles(0);
+  const fetchedFolders = await QUERIES.getFoldersByParentIdAndUserId({ parentFolderId: 0, userId });
+  const fetchedFiles = await QUERIES.getFilesByParentIdAndUserId({ parentFolderId: 0, userId });
   
   const data = [...fetchedFolders, ...fetchedFiles];
 

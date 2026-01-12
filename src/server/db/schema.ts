@@ -7,6 +7,7 @@ import {
   float,
   int,
   boolean,
+  date,
 } from "drizzle-orm/singlestore-core";
 
 export const createTable = singlestoreTableCreator(
@@ -80,6 +81,10 @@ export const users_table = createTable("users_table", {
   userId: text("user_id").notNull().primaryKey(),
   name: text("name").notNull(),
   email: text("type").notNull(),
+  dob: date("dob"),
+  gender: text("gender", {
+    enum: ["Male", "Female", "Third Gender", "Prefer not to disclose"],
+  }),
   profilePictureurl: text("profile_picture_url").notNull(),
   numberOfFilesUploaded: int("number_of_files_uploaded").notNull().default(0),
   numberOfFoldersUploaded: int("number_of_folders_uploaded")

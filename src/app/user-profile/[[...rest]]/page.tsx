@@ -3,7 +3,6 @@
 // const UserProfilePage = () => <UserProfile />
 
 // export default UserProfilePage
-
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
@@ -16,9 +15,11 @@ import dayjs from "dayjs"
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { PencilIcon } from "lucide-react"
 import ProfilePicture from "~/components/profile-picture"
+import { IconEdit } from "@tabler/icons-react"
+import EditableUserDetails from "~/components/editable-user-details"
 
 export default async function UserProfilePage() {
-  const { userId } = await auth()
+  const {userId} = await auth()
   const user = await currentUser()
 
 
@@ -29,6 +30,7 @@ export default async function UserProfilePage() {
   dayjs.extend(localizedFormat);
   const formattedDateAccountCreated = dayjs(new Date(user.createdAt ?? "")).format('lll');
   const formattedDateLastLogin = dayjs(new Date(user.lastSignInAt ?? "")).format('lll');
+
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
@@ -51,18 +53,19 @@ export default async function UserProfilePage() {
             </div>
           </div>
 
-          <Button variant="outline">Edit Profile</Button>
+          {/* <Button variant="outline">Edit Profile</Button> */}
         </CardHeader>
 
         <Separator />
 
         <CardContent className="grid gap-6 pt-6">
           {/* Account Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InfoItem
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><InfoItem
               label="User ID"
               value={user.id}
-            />
+            /> <IconEdit/></div>
+
             <InfoItem
               label="Account Created"
               value={formattedDateAccountCreated}
@@ -75,7 +78,8 @@ export default async function UserProfilePage() {
               label="Auth Provider"
               value={user.externalAccounts[0]?.provider || "Email"}
             />
-          </div>
+          </div> */}
+          <EditableUserDetails createdAt={user.createdAt} lastSignInAt={user.lastSignInAt} userId={userId}/>
 
           <Separator />
 

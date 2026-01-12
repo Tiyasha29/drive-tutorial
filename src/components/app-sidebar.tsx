@@ -45,7 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const {user: accountUser} = useUser();
   const pathname = usePathname();
-  const folderId =  parseInt((pathname === "/my-drive" ? "0" : pathname.split('/').pop()) ?? "0");
+  const folderId =  parseInt(((pathname === "/my-drive" || pathname === "/starred" || pathname === "/bin" || pathname === "/recent" || pathname === "/storage") ? "0" : pathname.split('/').pop()) ?? "0");
 
 
   const data = {

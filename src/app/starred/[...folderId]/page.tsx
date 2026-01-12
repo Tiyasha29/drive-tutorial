@@ -26,11 +26,17 @@ export default async function DemoPage(props: { params: Promise<{ folderId: stri
   //const router = useRouter();
   //const folderId = parseInt((await props.params).folderId);
 
+  const session = await auth();
+  const { userId } = session;
+  if(!userId) {
+    throw new Error("Unauthorized");
+  }
+
   const folderIdArray = (await props.params).folderId;
   const lastFolderIdInURL = parseInt(folderIdArray[folderIdArray.length - 1] ?? "0")
   
-  const fetchedFiles = await QUERIES.getFiles(lastFolderIdInURL);
-  const fetchedFolders = await QUERIES.getFolders(lastFolderIdInURL);
+  const fetchedFiles = await QUERIES.getFilesByParentIdAndUserId({ parentFolderId: lastFolderIdInURL, userId });
+  const fetchedFolders = await QUERIES.getFoldersByParentIdAndUserId({ parentFolderId: lastFolderIdInURL, userId });
   const data = [...fetchedFolders, ...fetchedFiles];
   
 

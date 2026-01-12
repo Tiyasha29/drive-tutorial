@@ -26,6 +26,7 @@ import {
 import StarAction from "~/components/star-action"
 import DataTableActionsForBinFile from "~/components/data-table-actions-for-bin-file"
 import DataTableActionsForBinFolder from "~/components/data-table-actions-for-bin-folder"
+import { auth } from "@clerk/nextjs/server"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.

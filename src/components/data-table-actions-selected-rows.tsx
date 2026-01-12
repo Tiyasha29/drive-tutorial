@@ -14,12 +14,15 @@ import {
 } from "~/components/ui/dropdown-menu"
 import { folders_table, files_table } from "~/server/db/schema"
 
-import { deleteFile, deleteFolder, moveToBinFile, moveToBinFolder, renameFile } from "~/server/actions"
+import { deleteFile, deleteFolder, getFolderOptionsForMovingFile, moveFile, moveFolder, moveToBinFile, moveToBinFolder, renameFile } from "~/server/actions"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal, MoreHorizontalIcon } from "lucide-react"
 import type { Row } from "@tanstack/react-table"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { IconFolderSymlink, IconTrashX } from "@tabler/icons-react"
+import { useState } from "react"
+import { Popover, PopoverTrigger } from "./ui/popover"
 
 
 export type Folders = typeof folders_table.$inferSelect;
@@ -36,8 +39,18 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
   const selectedFileRowsIds = selectedRows
   .filter((selectedRow) => selectedRow.original.type === "file")
   .map((selectedRow) => selectedRow.original.id);
+
+  const selectedFolderRows = selectedRows
+  .filter((selectedRow) => selectedRow.original.type === "folder");
+
+  const selectedFileRows = selectedRows
+  .filter((selectedRow) => selectedRow.original.type === "file");
   
   const router = useRouter();
+
+  const [showMoveToDialog, setShowMoveToDialog] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [folderValue, setFolderValue] = useState<Folders>();
 
   const { mutate: server_moveToBinFile } = useMutation({
     mutationFn: moveToBinFile,
@@ -54,6 +67,16 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
       router.refresh();
     }
   })
+
+  const { mutate: server_moveFolder } = useMutation({
+    mutationFn: moveFolder,
+
+    onSuccess: () => {
+      router.refresh();
+    }
+  })
+
+  
   
   return (
     <>
@@ -70,7 +93,10 @@ export default function DataTableActionsSelectedRows(props: { selectedRows: Row<
                 server_moveToBinFolder(selectedFolderRowsIds);
                 server_moveToBinFile(selectedFileRowsIds);
               }}>
-              Move to bin
+              <IconTrashX/>Move to bin
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setShowMoveToDialog(true)}>
+              <IconFolderSymlink/>Move
             </DropdownMenuItem>
             <DropdownMenuItem disabled>Download</DropdownMenuItem>
           </DropdownMenuGroup>

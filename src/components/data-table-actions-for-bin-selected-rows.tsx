@@ -23,6 +23,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "./ui/field"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog"
+import { IconRestore, IconTrashX } from "@tabler/icons-react"
 
 
 
@@ -89,13 +90,13 @@ export default function DataTableActionsForBinSelectedRows(props: { selectedRows
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
-              Delete forever
+              <IconTrashX/>Delete forever
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => {
               server_restoreFolder(selectedFolderRowsIds);
               server_restoreFile(selectedFileRowsIds);
             }}>
-              Restore all
+              <IconRestore/>Restore all
             </DropdownMenuItem>
             <DropdownMenuItem disabled>Download</DropdownMenuItem>
           </DropdownMenuGroup>

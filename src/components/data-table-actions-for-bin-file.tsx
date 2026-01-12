@@ -24,6 +24,7 @@ import { Input } from "./ui/input"
 import { useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "./ui/field"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog"
+import { IconRestore, IconTrashX } from "@tabler/icons-react"
 
 
 export type Folders = typeof folders_table.$inferSelect;
@@ -64,10 +65,10 @@ export default function DataTableActionsForBinFile(props: { row: Row<Folders | F
           <DropdownMenuLabel>File Actions</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={() => server_restoreFile([row.original.id])}>
-              Restore
+              <IconRestore/>Restore
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
-              Delete forever
+              <IconTrashX/>Delete forever
             </DropdownMenuItem>
             <DropdownMenuItem disabled>Download</DropdownMenuItem>
           </DropdownMenuGroup>

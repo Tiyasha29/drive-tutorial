@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { updateLastModifiedAtAllParents } from "~/app/utility-functions/update-last-modified-at-all-parents";
 import { subtractFromFolderSizeAllParents } from "~/app/utility-functions/subtract-from-folder-size-all-parents";
 import { addToFolderSizeAllParents } from "~/app/utility-functions/add-to-folder-size-all-parents";
+import getAllDescendantFolders from "~/app/utility-functions/get-all-descendant-folders";
 
 export type Folders = typeof folders_table.$inferSelect;
 export type Files = typeof files_table.$inferSelect;
@@ -45,20 +46,6 @@ export async function deleteFolder(folderIds: number[]) {
     );
 
   //Collect ALL descendant folders recursively
-  async function getAllDescendantFolders(ids: number[]): Promise<number[]> {
-    const children = await db
-      .select()
-      .from(folders_table)
-      .where(inArray(folders_table.parent, ids)); //children of all selected folders
-
-    if (children.length === 0) return ids;
-
-    const childIds = children.map((f) => f.id); //storing ids of all children in childIds
-
-    const deeper = await getAllDescendantFolders(childIds); //recursively calling with new child IDs as IDs
-
-    return [...ids, ...childIds, ...deeper];
-  }
 
   // get all folders we need to delete (selected + children)
   const allFolderIds = Array.from(
@@ -335,20 +322,6 @@ export async function moveToBinFolder(folderIds: number[]) {
     );
 
   //Collect ALL descendant folders recursively
-  async function getAllDescendantFolders(ids: number[]): Promise<number[]> {
-    const children = await db
-      .select()
-      .from(folders_table)
-      .where(inArray(folders_table.parent, ids)); //children of all selected folders
-
-    if (children.length === 0) return ids;
-
-    const childIds = children.map((f) => f.id); //storing ids of all children in childIds
-
-    const deeper = await getAllDescendantFolders(childIds); //recursively calling with new child IDs as IDs
-
-    return [...ids, ...childIds, ...deeper];
-  }
 
   // get all folders we need to move to bin (selected + children)
   const allFolderIds = Array.from(
@@ -436,20 +409,6 @@ export async function restoreFolder(folderIds: number[]) {
     );
 
   //Collect ALL descendant folders recursively
-  async function getAllDescendantFolders(ids: number[]): Promise<number[]> {
-    const children = await db
-      .select()
-      .from(folders_table)
-      .where(inArray(folders_table.parent, ids)); //children of all selected folders
-
-    if (children.length === 0) return ids;
-
-    const childIds = children.map((f) => f.id); //storing ids of all children in childIds
-
-    const deeper = await getAllDescendantFolders(childIds); //recursively calling with new child IDs as IDs
-
-    return [...ids, ...childIds, ...deeper];
-  }
 
   // get all folders we need to restore (selected + children)
   const allFolderIds = Array.from(
@@ -491,4 +450,144 @@ export async function updateProfilePictureUrl({
   userId: string;
 }) {
   await MUTATIONS.updateProfilePictureUrl({ profilePictureUrl, userId });
+  return { success: true };
+}
+
+export async function getFolderOptionsForMovingFile({
+  excludedFolderId,
+  userId,
+}: {
+  excludedFolderId: number;
+  userId: string;
+}) {
+  const folderOptions = await QUERIES.getAllFoldersExceptByIds({
+    excludedFolderIds: [excludedFolderId],
+    userId,
+  });
+  return folderOptions;
+}
+
+// ...existing code...
+export async function getFolderOptionsForMovingFolder({
+  folderId,
+  userId,
+}: {
+  folderId: number;
+  userId: string;
+}) {
+  const folder = await QUERIES.getFolderById(folderId);
+
+  const descendantFolderIds = await getAllDescendantFolders([folderId]);
+  let excludedFolderIds = descendantFolderIds;
+  if (folder?.parent !== 0) {
+    excludedFolderIds.push(folder?.parent ?? 0);
+  }
+  let folderOptions = await QUERIES.getAllFoldersExceptByIds({
+    excludedFolderIds: descendantFolderIds,
+    userId,
+  });
+
+  return folderOptions;
+}
+
+export async function moveFile({
+  fileId,
+  parentId,
+  userId,
+}: {
+  fileId: number;
+  parentId: number;
+  userId: string;
+}) {
+  const file = await QUERIES.getFileById(fileId);
+  const originalParent = await QUERIES.getFolderById(file?.parent ?? 0);
+  const newParent = await QUERIES.getFolderById(parentId);
+
+  await MUTATIONS.updateParentForFileById({ fileId, parentId });
+
+  if (originalParent) {
+    await subtractFromFolderSizeAllParents({
+      size: file?.sizeInBytes ?? 0,
+      parentFolderId: originalParent?.id ?? 0,
+    });
+  }
+
+  await addToFolderSizeAllParents({
+    size: file?.sizeInBytes ?? 0,
+    parentFolderId: newParent?.id ?? 0,
+  });
+  if (originalParent) {
+    updateLastModifiedAtAllParents(originalParent?.id ?? 0);
+  }
+
+  await updateLastModifiedAtAllParents(newParent?.id ?? 0);
+
+  return { success: true };
+}
+
+export async function moveFolder({
+  folderId,
+  parentId,
+  userId,
+}: {
+  folderId: number;
+  parentId: number;
+  userId: string;
+}) {
+  const folder = await QUERIES.getFolderById(folderId);
+  const originalParent = await QUERIES.getFolderById(folder?.parent ?? 0);
+  const newParent = await QUERIES.getFolderById(parentId);
+
+  await MUTATIONS.updateParentForFolderById({ folderId, parentId });
+
+  if (originalParent) {
+    await subtractFromFolderSizeAllParents({
+      size: folder?.size ?? 0,
+      parentFolderId: originalParent?.id ?? 0,
+    });
+  }
+
+  await addToFolderSizeAllParents({
+    size: folder?.size ?? 0,
+    parentFolderId: newParent?.id ?? 0,
+  });
+  if (originalParent) {
+    updateLastModifiedAtAllParents(originalParent?.id ?? 0);
+  }
+
+  await updateLastModifiedAtAllParents(newParent?.id ?? 0);
+
+  return { success: true };
+}
+
+export async function getDOBByUserId(userId: string) {
+  const dob = await QUERIES.getDOBByUserId(userId);
+  return dob;
+}
+
+export async function getGenderByUserId(userId: string) {
+  const gender = await QUERIES.getGenderByUserId(userId);
+  return gender;
+}
+
+export async function updateDOBByUserId({
+  userId,
+  dob,
+}: {
+  userId: string;
+  dob: Date | undefined;
+}) {
+  await MUTATIONS.updateDOBByUserId({ userId, dob });
+  return { success: true };
+}
+
+export async function updateGenderByUserId({
+  userId,
+  gender,
+}: {
+  userId: string;
+  gender: "Male" | "Female" | "Third Gender" | "Prefer not to disclose";
+}) {
+  await MUTATIONS.updateGenderByUserId({ userId, gender });
+  return { success: true };
 }
